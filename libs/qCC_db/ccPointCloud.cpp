@@ -147,6 +147,7 @@ ccPointCloud* ccPointCloud::partialClone(const CCLib::ReferenceCloud* selection,
 
 	//visibility
 	result->setVisible(isVisible());
+	result->setDisplay(getDisplay());
 
 	//RGB colors
 	if (hasColors())
@@ -830,7 +831,7 @@ void ccPointCloud::showSFColorsScale(bool state)
 
 bool ccPointCloud::sfColorScaleShown() const
 {
-	return m_sfColorScaleDisplayed && sfShown();
+	return m_sfColorScaleDisplayed;
 }
 
 const colorType* ccPointCloud::getPointScalarValueColor(unsigned pointIndex) const
@@ -1928,7 +1929,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 	{
 		if (MACRO_Foreground(context) && !context.sfColorScaleToDisplay)
 		{
-			if (sfColorScaleShown())
+			if (sfColorScaleShown() && sfShown())
 			{
 				//drawScale(context);
 				addColorRampInfo(context);
