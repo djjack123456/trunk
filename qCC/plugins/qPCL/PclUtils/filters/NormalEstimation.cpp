@@ -25,7 +25,7 @@
 #include <sm2cc.h>
 
 //PCL
-#include <sensor_msgs/PointCloud2.h>
+#include <utils/pcl_utilities.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/io/pcd_io.h>
@@ -109,8 +109,11 @@ int NormalEstimation::compute()
 
     //get as pcl point cloud
     pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud  (new pcl::PointCloud<pcl::PointXYZ>);
-
+#ifndef LP_PCL_ON_TRUNK
     pcl::fromROSMsg(sm_cloud, *pcl_cloud);
+#else
+    pcl::fromPCLPointCloud2(sm_cloud, *pcl_cloud);
+#endif
 
     //create storage for normals
     pcl::PointCloud<pcl::PointNormal>::Ptr normals (new pcl::PointCloud<pcl::PointNormal>);
@@ -119,7 +122,12 @@ int NormalEstimation::compute()
     int result = compute_normals<pcl::PointXYZ, pcl::PointNormal>(pcl_cloud, m_useKnn ? m_knn_radius: m_radius, m_useKnn, normals);
 
     sensor_msgs::PointCloud2::Ptr sm_normals (new sensor_msgs::PointCloud2);
+
+#ifndef LP_PCL_ON_TRUNK
     pcl::toROSMsg(*normals, *sm_normals);
+#else
+    pcl::toPCLPointCloud2(*normals, *sm_normals);
+#endif
 
 	sm2ccConverter converter2(sm_normals);
     converter2.addNormals(cloud);

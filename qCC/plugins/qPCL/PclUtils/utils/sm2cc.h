@@ -20,8 +20,16 @@
 
 #include "pcl_utilities.h"
 
+
+
+#ifdef LP_PCL_ON_TRUNK
+    #include <utils/pcl_utilities.h>
+#else
+
 //PCL
 #include <sensor_msgs/PointCloud2.h>
+
+#endif
 
 //system
 #include <list>

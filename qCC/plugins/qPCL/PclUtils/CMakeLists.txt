@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 2.8)
 
 #requires PCL
-find_package(PCL REQUIRED)
+find_package(PCL 1.6 EXACT REQUIRED)
 
 if( NOT MSVC )
 	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp -lpthread" )
@@ -56,6 +56,15 @@ OPTION( OPTION_LP_PCL_PATCH_ENABLED "Check wheter Luca's PCL patch has been appl
 if( ${OPTION_LP_PCL_PATCH_ENABLED} )
 	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS LP_PCL_PATCH_ENABLED )
 endif()
+
+
+# another Luca's PCL patch support
+OPTION( OPTION_LP_PCL_ON_TRUNK_ENABLED "Check wheter you are compiling against the trunk or against last release of PCL" OFF )
+if( ${OPTION_LP_PCL_ON_TRUNK_ENABLED} )
+        set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS LP_PCL_ON_TRUNK )
+endif()
+
+
 
 link_directories( ${PCL_LIBRARY_DIRS} )
 add_definitions( ${PCL_DEFINITIONS} )

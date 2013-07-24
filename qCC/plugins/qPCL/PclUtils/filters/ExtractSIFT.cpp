@@ -198,17 +198,30 @@ int ExtractSIFT::compute()
 	//Now do the actual computation
 	if (m_mode == SCALAR_FIELD)
 	{
+#ifndef LP_PCL_ON_TRUNK
 		pcl::fromROSMsg(*sm_cloud, *cloud_i);
+#else
+        pcl::fromPCLPointCloud2(*sm_cloud, *cloud_i);
+#endif
 		estimateSIFT<pcl::PointXYZI, pcl::PointXYZ>(cloud_i, out_cloud, m_nr_octaves, m_min_scale, m_nr_scales_per_octave, m_min_contrast );
 	}
 	else if (m_mode == RGB)
 	{
+#ifndef LP_PCL_ON_TRUNK
 		pcl::fromROSMsg(*sm_cloud, *cloud_rgb);
+#else
+        pcl::fromPCLPointCloud2(*sm_cloud, *cloud_rgb);
+#endif
 		estimateSIFT<pcl::PointXYZRGB, pcl::PointXYZ>(cloud_rgb, out_cloud, m_nr_octaves, m_min_scale, m_nr_scales_per_octave, m_min_contrast );
 	}
 
 	sensor_msgs::PointCloud2::Ptr out_cloud_sm (new sensor_msgs::PointCloud2);
+
+#ifndef LP_PCL_ON_TRUNK
 	pcl::toROSMsg(*out_cloud, *out_cloud_sm);
+#else
+    pcl::toPCLPointCloud2(*out_cloud, *out_cloud_sm);
+#endif
 
 	if ( (out_cloud_sm->height * out_cloud_sm->width) == 0)
 	{

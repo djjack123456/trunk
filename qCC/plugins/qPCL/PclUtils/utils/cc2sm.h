@@ -20,9 +20,6 @@
 
 #include "pcl_utilities.h"
 
-//PCL
-#include <sensor_msgs/PointCloud2.h>
-
 //qCC_db
 #include <ccPointCloud.h>
 

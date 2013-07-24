@@ -22,6 +22,7 @@
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
 #include <pcl/surface/mls.h>
+#include <utils/pcl_utilities.h>
 
 //qCC
 #include <ccPointCloud.h>

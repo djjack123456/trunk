@@ -24,8 +24,12 @@
 //PCL
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
-#include <sensor_msgs/PointField.h>
 
+#ifdef LP_PCL_ON_TRUNK
+#include <utils/pcl_utilities.h>
+#else
+#include <sensor_msgs/PointField.h>
+#endif
 //system
 #include <assert.h>
 
@@ -113,7 +117,12 @@ bool sm2ccConverter::addXYZ(ccPointCloud *cloud)
 
 	//add xyz to the given cloud taking xyz infos from the sm cloud
 	pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud (new pcl::PointCloud<pcl::PointXYZ>);
-	pcl::fromROSMsg(*m_sm_cloud, *pcl_cloud);
+#ifdef LP_PCL_ON_TRUNK
+    pcl::fromPCLPointCloud2(*m_sm_cloud, *pcl_cloud);
+#else
+    pcl::fromROSMsg(*m_sm_cloud, *pcl_cloud);
+#endif
+
 
 	//loop
 	for (size_t i = 0; i < pointCount; ++i)
@@ -135,7 +144,11 @@ bool sm2ccConverter::addNormals(ccPointCloud *cloud)
 		return false;
 
 	pcl::PointCloud<OnlyNormals>::Ptr pcl_cloud_normals (new pcl::PointCloud<OnlyNormals>);
+#ifndef LP_PCL_ON_TRUNK
 	pcl::fromROSMsg(*m_sm_cloud, *pcl_cloud_normals);
+#else
+    pcl::fromPCLPointCloud2(*m_sm_cloud, *pcl_cloud_normals);
+#endif
 
 	if (!cloud->reserveTheNormsTable())
 		return false;
@@ -164,7 +177,11 @@ bool sm2ccConverter::addRGB(ccPointCloud * cloud)
 		return false;
 
 	pcl::PointCloud<OnlyRGB>::Ptr pcl_cloud_rgb (new pcl::PointCloud<OnlyRGB>);
+#ifndef LP_PCL_ON_TRUNK
 	pcl::fromROSMsg(*m_sm_cloud, *pcl_cloud_rgb);
+#else
+    pcl::fromPCLPointCloud2(*m_sm_cloud, *pcl_cloud_rgb);
+#endif
 
 	if (!cloud->reserveTheRGBTable())
 		return false;
@@ -227,7 +244,11 @@ bool sm2ccConverter::addScalarField(ccPointCloud * cloud, const std::string& nam
 	if (floatField)
 	{
 		pcl::PointCloud<FloatScalar>::Ptr pcl_scalar(new pcl::PointCloud<FloatScalar>);
+#ifndef LP_PCL_ON_TRUNK
 		pcl::fromROSMsg(*m_sm_cloud, *pcl_scalar);
+#else
+        pcl::fromPCLPointCloud2(*m_sm_cloud, *pcl_scalar);
+#endif
 
 		for (size_t i = 0; i < pointCount; ++i)
 		{
@@ -238,7 +259,11 @@ bool sm2ccConverter::addScalarField(ccPointCloud * cloud, const std::string& nam
 	else
 	{
 		pcl::PointCloud<IntScalar>::Ptr pcl_scalar(new pcl::PointCloud<IntScalar>);
+#ifndef LP_PCL_ON_TRUNK
 		pcl::fromROSMsg(*m_sm_cloud, *pcl_scalar);
+#else
+        pcl::fromPCLPointCloud2(*m_sm_cloud, *pcl_scalar);
+#endif
 
 		for (size_t i = 0; i < pointCount; ++i)
 		{

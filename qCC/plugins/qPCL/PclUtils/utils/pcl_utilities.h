@@ -18,8 +18,25 @@
 #ifndef PCL_UTILITIES_H
 #define PCL_UTILITIES_H
 
-//PCL
+#ifndef LP_PCL_ON_TRUNK
 #include <sensor_msgs/PointCloud2.h>
+#include <sensor_msgs/PointField.h>
+#else
+
+#include <pcl/PCLPointCloud2.h>
+#include <pcl/PCLPointField.h>
+namespace sensor_msgs
+{
+typedef pcl::PCLPointCloud2 PointCloud2;
+typedef pcl::PCLPointCloud2ConstPtr PointCloud2ConstPtr;
+typedef pcl::PCLPointCloud2Ptr PointCloud2Ptr;
+typedef pcl::PCLPointField PointField;
+}
+
+
+#endif
+
+
 
 //Qt
 #include <QString>

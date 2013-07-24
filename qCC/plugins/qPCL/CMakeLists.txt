@@ -4,6 +4,8 @@ option( INSTALL_QPCL_PLUGIN "Check to install qPCL plugin" OFF )
 
 if (INSTALL_QPCL_PLUGIN)
 
+
+
 #CloudCompare 'PCL' bridge plugin
 project( QPCL_PLUGIN_DLL )
 
