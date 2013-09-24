@@ -40,6 +40,9 @@ public:
 	**/
     ccArrow(QString name = QString("Arrow"));
 
+    //! Returns class ID
+    virtual CC_CLASS_ENUM getClassID() const {return CC_ARROW;};
+
     void setPosition(const CCVector3 pos) ;
 
     void setDirection(const CCVector3 dir) ;

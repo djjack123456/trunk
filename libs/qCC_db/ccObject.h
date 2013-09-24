@@ -40,7 +40,7 @@ enum CC_OBJECT_FLAG {
 #define CC_ARRAY_BIT					0x00000010		//Array
 #define CC_LABEL_BIT					0x00000020		//2D label
 #define CC_VIEWPORT_BIT					0x00000040		//2D viewport
-//#define CC_FREE_BIT					0x00000080
+#define CC_ARROW_BIT					0x00000080      //3d arrow
 #define CC_CLOUD_BIT					0x00000100      //Point Cloud
 #define CC_MESH_BIT						0x00000200      //Mesh
 #define CC_OCTREE_BIT					0x00000400      //Octree
@@ -90,6 +90,7 @@ enum CC_CLASS_ENUM {
 	CC_CONE					=	CC_PRIMITIVE | CC_CONE_BIT,
 	CC_BOX					=	CC_PRIMITIVE | CC_BOX_BIT,
 	CC_DISH					=	CC_PRIMITIVE | CC_DISH_BIT,
+    CC_ARROW                =   CC_HIERARCHY_OBJECT | CC_ARRAY_BIT,
 	CC_EXTRU				=	CC_PRIMITIVE | CC_EXTRU_BIT,
 	CC_MATERIAL_SET			=	CC_MATERIAL_BIT | CC_GROUP_BIT | CC_LEAF_BIT,
 	CC_CHUNKED_ARRAY		=	CC_ARRAY_BIT,
