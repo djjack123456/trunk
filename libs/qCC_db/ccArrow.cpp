@@ -38,9 +38,10 @@ ccArrow::ccArrow(QString name/*=QString("Arrow")*/)
     m_position = CCVector3(0,0,0);
 
     m_arrowShaft = ccCylinder(0.15f,0.6f,0,"ArrowShaft",12);
+    m_arrowShaft.setVisible(true);
 
     m_arrowHead = ccCone(0.3f,0.0f,0.4f,0,0,0,"ArrowHead",24);
-
+    m_arrowHead.setVisible(true);
 
 }
 
@@ -61,17 +62,17 @@ void ccArrow::setScale(const PointCoordinateType sca)
 
 ccBBox ccArrow::getMyOwnBB()
 {
-    ccBBox bb_shaft;
-    m_arrowShaft.getBoundingBox(bb_shaft.minCorner().u, bb_shaft.maxCorner().u);
+    ccBBox bb_shaft = m_arrowShaft.getMyOwnBB();
+//    m_arrowShaft.getBoundingBox(bb_shaft.minCorner().u, bb_shaft.maxCorner().u);
 
-    ccBBox bb_head;
-    m_arrowHead.getBoundingBox(bb_head.minCorner().u, bb_head.maxCorner().u);
+    ccBBox bb_head = m_arrowHead.getMyOwnBB();
+//    m_arrowHead.getBoundingBox(bb_head.minCorner().u, bb_head.maxCorner().u);
 
 
-    ccBBox all = bb_shaft + bb_head;
-    all.setValidity(true);
+    bb_shaft += bb_head;
+//    all.setValidity(true);
 
-    return all;
+    return bb_shaft;
 }
 
 //! Sets the color
@@ -89,6 +90,10 @@ void ccArrow::setColor(const colorType col[])
 
 void ccArrow::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
+
+    CC_DRAW_CONTEXT markerContext = context;
+    markerContext._win = 0;
+
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
 
@@ -121,11 +126,11 @@ void ccArrow::drawMeOnly(CC_DRAW_CONTEXT& context)
 
     glTranslatef(0.0f,0.0f,0.3f);
     m_arrowShaft.setTempColor(m_rgbColor);
-    m_arrowShaft.draw(context);
+    m_arrowShaft.draw(markerContext);
 
     glTranslatef(0.0f,0.0f,0.3f+0.2f);
     m_arrowHead.setTempColor(m_rgbColor);
-    m_arrowHead.draw(context);
+    m_arrowHead.draw(markerContext);
 
 
     glPopMatrix();

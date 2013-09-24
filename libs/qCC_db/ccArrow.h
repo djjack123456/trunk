@@ -29,7 +29,7 @@
 **/
 #ifdef QCC_DB_USE_AS_DLL
 #include "qCC_db_dll.h"
-class QCC_DB_DLL_API ccSphere : public ccHObject
+class QCC_DB_DLL_API ccArrow: public ccHObject
 #else
 class ccArrow : public ccHObject
 #endif
