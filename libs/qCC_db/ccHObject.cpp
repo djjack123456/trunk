@@ -44,6 +44,7 @@
 #include "ccBox.h"
 #include "ccCone.h"
 #include "ccDish.h"
+#include "ccArrow.h"
 #include "ccExtru.h"
 
 //CCLib
@@ -131,6 +132,8 @@ ccHObject* ccHObject::New(unsigned objectType, const char* name/*=0*/)
 		return new ccCone(name);
 	case CC_DISH:
 		return new ccDish(name);
+    case CC_ARROW:
+        return new ccArrow(name);
 	case CC_EXTRU:
 		return new ccExtru(name);
 	case CC_POINT_OCTREE:
