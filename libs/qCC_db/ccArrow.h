@@ -68,8 +68,6 @@ protected:
 
     PointCoordinateType m_scale;
 
-    colorType m_rgbColor[3];
-
     ccCylinder m_arrowShaft;
 
     ccCone m_arrowHead;

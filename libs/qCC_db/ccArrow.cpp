@@ -33,12 +33,12 @@ ccArrow::ccArrow(QString name/*=QString("Arrow")*/)
     : ccHObject(name)
 
 {    
-    memcpy(m_rgbColor,ccColor::blue,sizeof(colorType)*3);
     m_direction = CCVector3(0,0,1);
     m_position = CCVector3(0,0,0);
 
-    m_arrowShaft = ccCylinder(0.15f,0.6f,0,"ArrowShaft",12);
+    m_arrowShaft = ccCylinder(0.15f,0.6f,0,"ArrowShaft",12);    
     m_arrowShaft.setVisible(true);
+
 
     m_arrowHead = ccCone(0.3f,0.0f,0.4f,0,0,0,"ArrowHead",24);
     m_arrowHead.setVisible(true);
@@ -79,11 +79,9 @@ ccBBox ccArrow::getMyOwnBB()
 /** \param col RGB color
 **/
 void ccArrow::setColor(const colorType col[])
-{
-    memcpy(m_rgbColor,col,sizeof(colorType)*3);
-
-
-
+{    
+    m_arrowHead.setColor(col);
+    m_arrowShaft.setColor(col);
 }
 
 
@@ -125,11 +123,11 @@ void ccArrow::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 
     glTranslatef(0.0f,0.0f,0.3f);
-    m_arrowShaft.setTempColor(m_rgbColor);
+    m_arrowShaft.setTempColor(ccColor::cyan);
     m_arrowShaft.draw(markerContext);
 
     glTranslatef(0.0f,0.0f,0.3f+0.2f);
-    m_arrowHead.setTempColor(m_rgbColor);
+    m_arrowHead.setTempColor(ccColor::cyan);
     m_arrowHead.draw(markerContext);
 
 
