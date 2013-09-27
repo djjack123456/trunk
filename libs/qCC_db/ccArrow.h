@@ -40,8 +40,11 @@ public:
 	**/
     ccArrow(QString name = QString("Arrow"));
 
+    //desctructor
+    virtual ~ccArrow();
+
     //! Returns class ID
-    virtual CC_CLASS_ENUM getClassID() const {return CC_ARROW;};
+    virtual CC_CLASS_ENUM getClassID() const {return CC_ARROW;}
 
     void setPosition(const CCVector3 pos) ;
 
@@ -49,12 +52,21 @@ public:
 
     void setScale(const PointCoordinateType sca) ;
 
+//    virtual ccBBox getBB(bool relative = true, bool withGLfeatures = false, const ccGenericGLDisplay* window = NULL);
+
     //! Sets the color
     /** \param col RGB color
     **/
     void setColor(const colorType col[]) ;
 
+//    virtual ccBBox getFitBB(ccGLMatrix& trans);
     virtual ccBBox getMyOwnBB();
+
+
+    void buildPrimitives();
+
+    SelectionBehavior getSelectionBehavior(){return SELECTION_FIT_BBOX;}
+
 
 
 protected:
@@ -68,9 +80,11 @@ protected:
 
     PointCoordinateType m_scale;
 
-    ccCylinder m_arrowShaft;
+    ccCylinder * m_arrowShaft;
 
-    ccCone m_arrowHead;
+    ccCone * m_arrowHead;
+
+    colorType m_color[3];
 
 
 };
