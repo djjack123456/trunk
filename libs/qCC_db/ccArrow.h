@@ -29,63 +29,35 @@
 **/
 #ifdef QCC_DB_USE_AS_DLL
 #include "qCC_db_dll.h"
-class QCC_DB_DLL_API ccArrow: public ccHObject
+class QCC_DB_DLL_API ccArrow: public ccGenericPrimitive
 #else
-class ccArrow : public ccHObject
+class ccArrow : public ccGenericPrimitive
 #endif
 {
-public:
-	//! Simplified constructor
-	/** For ccHObject factory only!
-	**/
+public:    
+    //! Constructor
+    ccArrow(const PointCoordinateType scale,
+            const ccGLMatrix * transmat = 0,
+            QString name = QString("Arrow"),
+            unsigned precision = 12);
+
+
+    //! simplified const
     ccArrow(QString name = QString("Arrow"));
 
-    //desctructor
-    virtual ~ccArrow();
 
     //! Returns class ID
     virtual CC_CLASS_ENUM getClassID() const {return CC_ARROW;}
 
-    void setPosition(const CCVector3 pos) ;
 
-    void setDirection(const CCVector3 dir) ;
-
-    void setScale(const PointCoordinateType sca) ;
-
-//    virtual ccBBox getBB(bool relative = true, bool withGLfeatures = false, const ccGenericGLDisplay* window = NULL);
-
-    //! Sets the color
-    /** \param col RGB color
-    **/
-    void setColor(const colorType col[]) ;
-
-//    virtual ccBBox getFitBB(ccGLMatrix& trans);
-    virtual ccBBox getMyOwnBB();
-
-
-    void buildPrimitives();
-
-    SelectionBehavior getSelectionBehavior(){return SELECTION_FIT_BBOX;}
-
-
+    //! inherited from ccGenericPrimitive
+    virtual QString getTypeName() const { return "Arrow"; }
+    virtual bool hasDrawingPrecision() const { return true; }
+    virtual ccGenericPrimitive* clone() const ;
+    virtual bool buildUp();
 
 protected:
-
-    //inherited methods (ccHObject)
-    virtual void drawMeOnly(CC_DRAW_CONTEXT& context);
-
-    CCVector3 m_position;
-
-    CCVector3 m_direction;
-
     PointCoordinateType m_scale;
-
-    ccCylinder * m_arrowShaft;
-
-    ccCone * m_arrowHead;
-
-    colorType m_color[3];
-
 
 };
 
