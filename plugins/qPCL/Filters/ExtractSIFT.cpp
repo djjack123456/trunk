@@ -53,7 +53,7 @@ ExtractSIFT::ExtractSIFT()
 	: BaseFilter(FilterDescription(	"Extract SIFT",
 									"Extract SIFT Keypoints",
 									"Extract SIFT keypoints for clouds with intensity/RGB or any scalar field",
-                                    ":/toolbar/PclUtils/icons/sift.png"))
+                                    ":/toolbar/Filters/icons/sift.png"))
 	, m_dialog(0)
 {
 }

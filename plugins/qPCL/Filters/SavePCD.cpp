@@ -46,7 +46,7 @@ SavePCD::SavePCD()
     : BaseFilter(FilterDescription("SavePCD",
                                    "Save as PCD FIle",
                                    "Save selected entitiy as PCD File",
-                                   ":/toolbar/PclUtils/icons/save.png") )
+                                   ":/toolbar/Filters/icons/save.png") )
 {
 }
 

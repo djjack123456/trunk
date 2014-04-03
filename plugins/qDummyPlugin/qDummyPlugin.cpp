@@ -21,12 +21,16 @@
 //Qt
 #include <QtGui>
 
+#include <iostream>
+
 //Default constructor: should mainly be used to initialize
 //actions (pointers) and other members
 qDummyPlugin::qDummyPlugin(QObject* parent/*=0*/)
 	: QObject(parent)
 	, m_action(0)
 {
+
+    std::cout << "dummy plugin loaded" << std::endl;
 }
 
 //This method should enable or disable each plugin action

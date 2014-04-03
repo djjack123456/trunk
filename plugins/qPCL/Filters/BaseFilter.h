@@ -46,7 +46,7 @@ public:
 		: m_filter_name("PCLFilter")
 		, m_entry_name("filter")
 		, m_status_tip("Compute something with PCL")
-		, m_icon(QIcon(QString::fromUtf8(":/toolbar/PclUtils/icons/pcl.png")) )
+        , m_icon(QIcon(QString::fromUtf8(":/toolbar/Filters/icons/pcl.png")) )
 	{}
 
     FilterDescription(QString filterName, QString entryName, QString statusTip, QString icon)

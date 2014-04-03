@@ -35,7 +35,7 @@ MLSSmoothingUpsampling::MLSSmoothingUpsampling()
     : BaseFilter(FilterDescription("MLS smoothing",
                                    "Smooth using MLS, optionally upsample",
                                    "Smooth the cloud using Moving Least Sqares algorithm, estimate normals and optionally upsample",
-                                   ":/toolbar/PclUtils/icons/mls_smoothing.png"))
+                                   ":/toolbar/Filters/icons/mls_smoothing.png"))
 	, m_dialog(0)
 	, m_parameters(new MLSParameters)
 {

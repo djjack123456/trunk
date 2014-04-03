@@ -39,7 +39,7 @@ NormalEstimation::NormalEstimation()
     : BaseFilter(FilterDescription("Estimate Normals",
                                    "Estimate Normals and Curvature",
                                    "Estimate Normals and Curvature for the selected entity",
-                                   ":/toolbar/PclUtils/icons/normal_curvature.png"))
+                                   ":/toolbar/Filters/icons/normal_curvature.png"))
 	, m_dialog(0)
 	, m_radius(0)
 	, m_knn_radius(10)

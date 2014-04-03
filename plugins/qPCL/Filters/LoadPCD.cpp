@@ -43,7 +43,7 @@ LoadPCD::LoadPCD()
     : BaseFilter(FilterDescription("LoadPCD",
                                    "Load PCD FIle",
                                    "Load a PCD File",
-                                   ":/toolbar/PclUtils/icons/load.png"))
+                                   ":/toolbar/Filters/icons/load.png"))
 {
 }
 

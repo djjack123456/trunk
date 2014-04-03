@@ -18,11 +18,10 @@ if( MSVC )
 endif()
 
 include_directories(${PCL_INCLUDE_DIRS})
-include_directories(filters)
-include_directories(filters/dialogs)
-include_directories(utils)
+include_directories(dialogs)
+include_directories(../PclUtils)
 
-project( QPCL_PLUGIN_UTILS_LIB )
+project( QPCL_PLUGIN_FILTERS )
 
 file( GLOB_RECURSE header_list *.h )
 file( GLOB_RECURSE source_list *.cpp )
@@ -37,7 +36,7 @@ qt4_wrap_cpp( moc_list ${mocable_list} )
 QT4_WRAP_UI( generated_ui_list ${ui_list} )
 #QT4_ADD_RESOURCES( generated_qrc_list ${qrc_list} )
 
-add_library( ${PROJECT_NAME} SHARED ${header_list} ${source_list} ${impl_list} ${moc_list} ${generated_ui_list} )
+add_library( ${PROJECT_NAME} STATIC ${header_list} ${source_list} ${impl_list} ${moc_list} ${generated_ui_list} )
 
 # Default preprocessors
 set_default_cc_preproc( ${PROJECT_NAME} )
@@ -61,5 +60,3 @@ endif()
 link_directories( ${PCL_LIBRARY_DIRS} )
 add_definitions( ${PCL_DEFINITIONS} )
 target_link_libraries( ${PROJECT_NAME} ${PCL_LIBRARIES} ${EXTERNAL_LIBS_LIBRARIES})
-
-install_shared(${PROJECT_NAME} lib lib)

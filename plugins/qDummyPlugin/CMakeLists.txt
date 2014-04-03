@@ -10,6 +10,14 @@ if (INSTALL_QDUMMY_PLUGIN)
 #CloudCompare 'DUMMY' plugin
 project( QDUMMY_PLUGIN )
 
+#set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} -Bsymbolic" )
+
+find_package(SPC 0.1.0 REQUIRED)
+include_directories(${SPC_INCLUDE_DIRS})
+message(${SPC_INCLUDE_DIRS})
+link_directories(${SPC_LIBRARY_DIRS})
+add_definitions(${SPC_DEFINITIONS})
+
 #load necessary libraries (see qPCV for an example)
 #add_subdirectory (LIB1)
 
@@ -18,7 +26,10 @@ project( QDUMMY_PLUGIN )
 include( ../CMakePluginTpl.cmake )
 
 #set dependencies to necessary libraries (see qPCV for an example)
-#target_link_libraries( ${PROJECT_NAME} LIB1 )
+#target_link_libraries( ${PROJECT_NAME} ${SPC_LIBRARIES} )
+#target_link_libraries( ${PROJECT_NAME} )
+#target_link_libraries( ${PROJECT_NAME} QPCL_PLUGIN_UTILS_LIB )
+
 #include_directories( ${LIB1_INCLUDE_DIR} )
 
 endif()

@@ -8,6 +8,7 @@ if (INSTALL_QPCL_PLUGIN)
 project( QPCL_PLUGIN )
 
 add_subdirectory(PclUtils)
+add_subdirectory(Filters)
 add_subdirectory(doc)
 
 #include_directories(pcl)
@@ -17,14 +18,18 @@ include_directories( ${QPCL_PLUGIN_UTILS_LIB_SOURCE_DIR}/filters )
 include_directories( ${QPCL_PLUGIN_UTILS_LIB_BINARY_DIR} )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../) #the plugin dir
 
-
+include_directories( Filters )
 
 #requires PCL
 find_package(PCL REQUIRED)
 
 include( ../CMakePluginTpl.cmake )
 
+
+
 target_link_libraries(${PROJECT_NAME} QPCL_PLUGIN_UTILS_LIB)
+target_link_libraries(${PROJECT_NAME} QPCL_PLUGIN_FILTERS)
+
 
 include_directories(${PCL_INCLUDE_DIRS})
 link_directories(${PCL_LIBRARY_DIRS})

@@ -30,7 +30,7 @@ testfilter::testfilter()
 : BaseFilter(FilterDescription("Test Filter",
                                "Test Filter",
                                "TEST!",
-                               ":/toolbar/PclUtils/icons/pcl.png") )
+                               ":/toolbar/Filters/icons/pcl.png") )
 , m_app()
 {
 	m_thread_pool = QThreadPool::globalInstance();
