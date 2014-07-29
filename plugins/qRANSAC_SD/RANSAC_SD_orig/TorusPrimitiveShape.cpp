@@ -26,9 +26,9 @@ size_t TorusPrimitiveShape::Identifier() const
 	return 4;
 }
 
-PrimitiveShape *TorusPrimitiveShape::Clone() const
+std::shared_ptr<PrimitiveShape> TorusPrimitiveShape::Clone() const
 {
-	return new TorusPrimitiveShape(*this);
+	return std::make_shared<TorusPrimitiveShape>(*this);
 }
 
 float TorusPrimitiveShape::Distance(const Vec3f &p) const
@@ -99,7 +99,7 @@ bool TorusPrimitiveShape::Fit(const PointCloud &pc, float epsilon,
 	return false;
 }
 
-PrimitiveShape *TorusPrimitiveShape::LSFit(const PointCloud &pc, float epsilon,
+std::shared_ptr<PrimitiveShape> TorusPrimitiveShape::LSFit(const PointCloud &pc, float epsilon,
 	float normalThresh, MiscLib::Vector< size_t >::const_iterator begin,
 	MiscLib::Vector< size_t >::const_iterator end,
 	std::pair< size_t, float > *score) const
@@ -108,10 +108,10 @@ PrimitiveShape *TorusPrimitiveShape::LSFit(const PointCloud &pc, float epsilon,
 	if(fit.LeastSquaresFit(pc, begin, end))
 	{
 		score->first = -1;
-		return new TorusPrimitiveShape(fit);
+		return std::make_shared<TorusPrimitiveShape>(fit);
 	}
 	score->first = 0;
-	return NULL;
+	return nullptr;
 }
 
 LevMarFunc< float > *TorusPrimitiveShape::SignedDistanceFunc() const
@@ -159,7 +159,7 @@ void TorusPrimitiveShape::Visit(PrimitiveShapeVisitor *visitor) const
 void TorusPrimitiveShape::SuggestSimplifications(const PointCloud &pc,
 	MiscLib::Vector< size_t >::const_iterator begin,
 	MiscLib::Vector< size_t >::const_iterator end, float distThresh,
-	MiscLib::Vector< MiscLib::RefCountPtr< PrimitiveShape > > *suggestions) const
+	MiscLib::Vector< std::shared_ptr< PrimitiveShape > > *suggestions) const
 {
 	// sample the bounding box in parameter space at 25 locations
 	// these points are used to estimate the other shapes
@@ -197,8 +197,7 @@ void TorusPrimitiveShape::SuggestSimplifications(const PointCloud &pc,
 			}
 		if(!failed)
 		{
-			suggestions->push_back(new ConePrimitiveShape(cone));
-			suggestions->back()->Release();
+			suggestions->push_back(std::make_shared<ConePrimitiveShape>(cone));
 		}
 	}
 	Cylinder cylinder;
@@ -214,8 +213,7 @@ void TorusPrimitiveShape::SuggestSimplifications(const PointCloud &pc,
 			}
 		if(!failed)
 		{
-			suggestions->push_back(new CylinderPrimitiveShape(cylinder));
-			suggestions->back()->Release();
+			suggestions->push_back(std::make_shared<CylinderPrimitiveShape>(cylinder));
 		}
 	}
 	Sphere sphere;
@@ -231,8 +229,7 @@ void TorusPrimitiveShape::SuggestSimplifications(const PointCloud &pc,
 			}
 		if(!failed)
 		{
-			suggestions->push_back(new SpherePrimitiveShape(sphere));
-			suggestions->back()->Release();
+			suggestions->push_back(std::make_shared<SpherePrimitiveShape>(sphere));
 		}
 	}
 	Plane plane;
@@ -247,8 +244,7 @@ void TorusPrimitiveShape::SuggestSimplifications(const PointCloud &pc,
 			}
 		if(!failed)
 		{
-			suggestions->push_back(new PlanePrimitiveShape(plane));
-			suggestions->back()->Release();
+			suggestions->push_back(std::make_shared<PlanePrimitiveShape>(plane));
 		}
 	}
 	/*// although theoretically possible, we never suggest a cone since a misclassification
@@ -278,7 +274,6 @@ void TorusPrimitiveShape::SuggestSimplifications(const PointCloud &pc,
 		pos -= (m_torus.MinorRadius() - radiusDiffMajor) * normal;
 		Cylinder cylinder(cyAxisDir, pos, m_torus.MinorRadius());
 		suggestions->push_back(new CylinderPrimitiveShape(cylinder));
-		suggestions->back()->Release();
 	}
 	// now test if the minor radius can be replaced
 	float radiusDiffMinor = (m_torus.MinorRadius() - (std::cos(radialMinor / 2)
@@ -293,7 +288,6 @@ void TorusPrimitiveShape::SuggestSimplifications(const PointCloud &pc,
 		Sphere sphere(m_torus.Center(),
 			(m_torus.MajorRadius() + m_torus.MinorRadius()) / 2);
 		suggestions->push_back(new SpherePrimitiveShape(sphere));
-		suggestions->back()->Release();
 	}
 	// we can also suggest a sphere if the error introduced by a common radius
 	// for minor and major does not introduce an error
@@ -312,7 +306,6 @@ void TorusPrimitiveShape::SuggestSimplifications(const PointCloud &pc,
 			paramCenter[1] * m_torus.MinorRadius(), &pos, &normal);
 		Plane plane(pos, normal);
 		suggestions->push_back(new PlanePrimitiveShape(plane));
-		suggestions->back()->Release();
 	}*/
 }
 

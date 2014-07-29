@@ -13,7 +13,7 @@ unsigned int TorusPrimitiveShapeConstructor::RequiredSamples() const
 	return 4;
 }
 
-PrimitiveShape *TorusPrimitiveShapeConstructor::Construct(
+std::shared_ptr<PrimitiveShape> TorusPrimitiveShapeConstructor::Construct(
 	const MiscLib::Vector< Vec3f > &points,
 	const MiscLib::Vector< Vec3f > &normals) const
 {
@@ -25,19 +25,19 @@ PrimitiveShape *TorusPrimitiveShapeConstructor::Construct(
 	return Construct(samples);
 }
 
-PrimitiveShape *TorusPrimitiveShapeConstructor::Construct(
+std::shared_ptr<PrimitiveShape> TorusPrimitiveShapeConstructor::Construct(
 	const MiscLib::Vector< Vec3f > &samples) const
 {
 	Torus torus;
 	if(!torus.Init(samples))
 		return NULL;
-	return new TorusPrimitiveShape(torus);
+	return std::make_shared<TorusPrimitiveShape>(torus);
 }
 
-PrimitiveShape *TorusPrimitiveShapeConstructor::Deserialize(std::istream *i,
+std::shared_ptr<PrimitiveShape> TorusPrimitiveShapeConstructor::Deserialize(std::istream *i,
 	bool binary) const
 {
-	TorusPrimitiveShape *shape = new TorusPrimitiveShape();
+	std::shared_ptr<TorusPrimitiveShape> shape(new TorusPrimitiveShape());
 	shape->Deserialize(i, binary);
 	return shape;
 }

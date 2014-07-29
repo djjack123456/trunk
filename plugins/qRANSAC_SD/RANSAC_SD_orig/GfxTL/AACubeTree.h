@@ -526,7 +526,7 @@ namespace GfxTL
 					stack.pop_back();
 					continue;
 				}
-				if(IsLeaf(*p.first))
+				if(this->IsLeaf(*p.first))
 				{
 					if(!ShouldSubdivide(*p.first, p.second))
 					{
@@ -547,7 +547,7 @@ namespace GfxTL
 							p.first->Children()[i] = (CellType *)1;
 					}
 					Distribute(p.second, p.first);
-					if(IsLeaf(*p.first)) // couldn't subdivide?
+					if(this->IsLeaf(*p.first)) // couldn't subdivide?
 					{
 						stack.pop_back();
 						continue;
@@ -556,7 +556,7 @@ namespace GfxTL
 				else
 					LeaveGlobalBuildInformation(*p.first, p.second);
 				while(p.second.CreateChild() < (1 << DimT) &&
-					!this->ExistsChild(*p.first, p.second.CreateChild()))
+					!this->ExistChild(*p.first, p.second.CreateChild()))
 					++p.second.CreateChild();
 				if(p.second.CreateChild() == (1 << DimT))
 					continue;
@@ -572,7 +572,7 @@ namespace GfxTL
 					++p.second.CreateChild();
 				}
 				while(p.second.CreateChild() < (1 << DimT) &&
-					!this->ExistsChild(*p.first, p.second.CreateChild()));
+					!this->ExistChild(*p.first, p.second.CreateChild()));
 			}
 		}
 
@@ -604,7 +604,7 @@ namespace GfxTL
 					queue.pop_front();
 					continue;
 				}
-				if(IsLeaf(*p.first))
+				if(this->IsLeaf(*p.first))
 				{
 					if(!ShouldSubdivide(*p.first, p.second))
 					{
@@ -625,7 +625,7 @@ namespace GfxTL
 							p.first->Children()[i] = (CellType *)1;
 					}
 					Distribute(p.second, p.first);
-					if(IsLeaf(*p.first)) // couldn't subdivide?
+					if(this->IsLeaf(*p.first)) // couldn't subdivide?
 					{
 						queue.pop_front();
 						continue;
@@ -813,7 +813,7 @@ namespace GfxTL
 				this->GetCellRange(cell, ti, range);
 				return &cell;
 			}
-			if(this->CellLevel(cell, ti) == maxLevel)
+			if(CellLevel(cell, ti) == maxLevel)
 			{
 				this->GetCellRange(cell, ti, range);
 				return &cell;

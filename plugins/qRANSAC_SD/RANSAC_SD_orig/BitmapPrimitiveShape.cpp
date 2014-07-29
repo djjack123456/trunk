@@ -95,7 +95,7 @@ bool BitmapPrimitiveShape::Init(bool binary, std::istream *i)
 }
 
 size_t BitmapPrimitiveShape::AllConnectedComponents(const PointCloud &pc, float epsilon,
-	BitmapInfo& bitmapInfo, MiscLib::Vector< size_t > *indices, MiscLib::Vector< int >& componentsImg, 
+	BitmapInfo& bitmapInfo, std::shared_ptr<MiscLib::Vector< size_t > >indices, MiscLib::Vector< int >& componentsImg, 
 		MiscLib::Vector< std::pair< int, size_t > >& labels, bool doFiltering )
 {
 	// first find the extent in the parametrization
@@ -154,7 +154,7 @@ size_t BitmapPrimitiveShape::AllConnectedComponents(const PointCloud &pc, float 
 
 size_t BitmapPrimitiveShape::ConnectedComponent(
 	const PointCloud &pc, float epsilon,
-	MiscLib::Vector< size_t > *indices, bool doFiltering, float* borderRatio )
+	std::shared_ptr<MiscLib::Vector< size_t > >indices, bool doFiltering, float* borderRatio )
 {
 	MiscLib::Vector< int > componentsImg;
 	MiscLib::Vector< std::pair< int, size_t > > labels;

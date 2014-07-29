@@ -28,9 +28,9 @@ size_t PlanePrimitiveShape::Identifier() const
 	return 0;
 }
 
-PrimitiveShape *PlanePrimitiveShape::Clone() const
+std::shared_ptr<PrimitiveShape> PlanePrimitiveShape::Clone() const
 {
-	return new PlanePrimitiveShape(*this);
+	return std::make_shared<PlanePrimitiveShape>(*this);
 }
 
 float PlanePrimitiveShape::Distance(const Vec3f &p) const
@@ -95,7 +95,7 @@ bool PlanePrimitiveShape::Fit(const PointCloud &pc, float epsilon,
 	return false;
 }
 
-PrimitiveShape *PlanePrimitiveShape::LSFit(const PointCloud &pc, float epsilon,
+std::shared_ptr<PrimitiveShape> PlanePrimitiveShape::LSFit(const PointCloud &pc, float epsilon,
 	float normalThresh, MiscLib::Vector< size_t >::const_iterator begin,
 	MiscLib::Vector< size_t >::const_iterator end,
 	std::pair< size_t, float > *score) const
@@ -104,10 +104,10 @@ PrimitiveShape *PlanePrimitiveShape::LSFit(const PointCloud &pc, float epsilon,
 	if(fit.LeastSquaresFit(pc, begin, end))
 	{
 		score->first = -1;
-		return new PlanePrimitiveShape(fit);
+		return std::make_shared<PlanePrimitiveShape>(fit);
 	}
 	score->first = 0;
-	return NULL;
+	return nullptr;
 }
 
 void PlanePrimitiveShape::Serialize(std::ostream *o, bool binary) const
@@ -202,8 +202,8 @@ void PlanePrimitiveShape::InBitmap(const std::pair< float, float > &param,
 	float epsilon, const GfxTL::AABox< GfxTL::Vector2Df > &bbox, size_t,
 	size_t, std::pair< int, int > *inBmp) const
 {
-	inBmp->first = (int)std::floor((param.first - bbox.Min()[0]) / epsilon);
-	inBmp->second = (int)std::floor((param.second - bbox.Min()[1]) / epsilon);
+	inBmp->first = std::floor((param.first - bbox.Min()[0]) / epsilon);
+	inBmp->second = std::floor((param.second - bbox.Min()[1]) / epsilon);
 }
 void PlanePrimitiveShape::WrapBitmap(
 	const GfxTL::AABox< GfxTL::Vector2Df > &bbox, float epsilon, bool *uwrap,

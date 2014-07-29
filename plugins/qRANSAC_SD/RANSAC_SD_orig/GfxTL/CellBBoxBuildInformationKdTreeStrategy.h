@@ -72,10 +72,10 @@ namespace GfxTL
 				m_bbox[1] = new ScalarType[BaseType::m_dim];
 				// init the values (box of zero volume)
 				typename BaseType::HandleType i = bi->Range().first;
-				this->AssignAsAABoxMin(this->at(this->Dereference(i)), &m_bbox[0]);
-				this->AssignAsAABoxMax(this->at(this->Dereference(i)), &m_bbox[1]);
+				AssignAsAABoxMin(this->at(Dereference(i)), &m_bbox[0]);
+				AssignAsAABoxMax(this->at(Dereference(i)), &m_bbox[1]);
 				for(++i; i != bi->Range().second; ++i)
-					this->IncludeInAABox(this->at(this->Dereference(i)), m_bbox);
+					IncludeInAABox(this->at(Dereference(i)), m_bbox);
 				bi->CellBBox(m_bbox);
 			}
 

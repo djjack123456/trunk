@@ -225,12 +225,12 @@ bool LevMar(IteratorT begin, IteratorT end, FuncT &func,
 						v[i] += F0[k * paramDim + i] * d[k];
 					v[i] *= -1;
 #ifndef DOPARALLEL
-					vmag = std::max((ScalarType)abs(v[i]), vmag);
+					vmag = std::max<ScalarType>(fabs(v[i]), vmag);
 #endif
 				}
 #ifdef DOPARALLEL
 				for(unsigned int i = 0; i < paramDim; ++i)
-					vmag = std::max(abs(v[i]), vmag);
+					vmag = std::max<ScalarType>(fabs(v[i]), vmag);
 #endif
 				// and check for convergence with magnitude of v
 #ifndef PRECISIONLEVMAR
@@ -247,14 +247,14 @@ bool LevMar(IteratorT begin, IteratorT end, FuncT &func,
 				if(outerIter == 1)
 				{
 					// compute magnitue of F0
-					ScalarType fmag = abs(F0[0]);
+					ScalarType fmag = fabs(F0[0]);
 					for(size_t i = 1; i < paramDim * size; ++i)
-						if(fmag < abs(F0[i]))
-							fmag = abs(F0[i]);
+						if(fmag < fabs(F0[i]))
+							fmag = fabs(F0[i]);
 					lambda = 1e-3f * fmag;
 				}
 				else
-					lambda *= std::max(ScalarType(.3), 1 - std::pow(2 * rho - 1, 3));
+					lambda *= std::max<ScalarType>(ScalarType(.3), 1 - std::pow(2 * rho - 1, 3));
 			}
 
 			memcpy(H, U, sizeof(ScalarType) * paramDim * paramDim);
@@ -266,7 +266,7 @@ bool LevMar(IteratorT begin, IteratorT end, FuncT &func,
 			if(!Cholesky< ScalarType, paramDim >(H, p))
 				goto increment;
 			CholeskySolve< ScalarType, paramDim >(H, p, v, x);
-
+			
 			// magnitude of x small? If yes we are done
 			for(size_t i = 0; i < paramDim; ++i)
 				xNorm += x[i] * x[i];
@@ -424,7 +424,7 @@ ScalarT LevMar(unsigned int paramDim, unsigned int imgDim,
 					param[i] = paramNew[i];
 				goto cleanup;
 			}*/
-			if(/*newChi <= chi &&*/ abs(chi - newChi)
+			if(/*newChi <= chi &&*/ fabs(chi - newChi)
 				/ chi < ScalarT(1e-4))
 			{
 				for(size_t i = 0; i < paramDim; ++i)

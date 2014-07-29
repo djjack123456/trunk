@@ -28,9 +28,9 @@ size_t CylinderPrimitiveShape::Identifier() const
 	return 2;
 }
 
-PrimitiveShape *CylinderPrimitiveShape::Clone() const
+std::shared_ptr<PrimitiveShape> CylinderPrimitiveShape::Clone() const
 {
-	return new CylinderPrimitiveShape(*this);
+	return std::make_shared<CylinderPrimitiveShape>(*this);
 }
 
 bool CylinderPrimitiveShape::Init(const Vec3f &pointA, const Vec3f &pointB,
@@ -102,7 +102,7 @@ bool CylinderPrimitiveShape::Fit(const PointCloud &pc, float epsilon,
 	return false;
 }
 
-PrimitiveShape *CylinderPrimitiveShape::LSFit(const PointCloud &pc,
+std::shared_ptr<PrimitiveShape> CylinderPrimitiveShape::LSFit(const PointCloud &pc,
 	float epsilon, float normalThresh,
 	MiscLib::Vector< size_t >::const_iterator begin,
 	MiscLib::Vector< size_t >::const_iterator end,
@@ -112,10 +112,10 @@ PrimitiveShape *CylinderPrimitiveShape::LSFit(const PointCloud &pc,
 	if(fit.LeastSquaresFit(pc, begin, end))
 	{
 		score->first = -1;
-		return new CylinderPrimitiveShape(fit);
+		return std::make_shared<CylinderPrimitiveShape>(fit);
 	}
 	score->first = 0;
-	return NULL;
+	return nullptr;
 }
 
 LevMarFunc< float > *CylinderPrimitiveShape::SignedDistanceFunc() const
@@ -161,7 +161,7 @@ void CylinderPrimitiveShape::Visit(PrimitiveShapeVisitor *visitor) const
 void CylinderPrimitiveShape::SuggestSimplifications(const PointCloud &pc,
 	MiscLib::Vector< size_t >::const_iterator begin,
 	MiscLib::Vector< size_t >::const_iterator end, float distThresh,
-	MiscLib::Vector< MiscLib::RefCountPtr< PrimitiveShape > > *suggestions) const
+	MiscLib::Vector< std::shared_ptr< PrimitiveShape > > *suggestions) const
 {
 	// sample the bounding box in parameter space at 25 locations
 	// these points are used to estimate the other shapes
@@ -192,8 +192,7 @@ void CylinderPrimitiveShape::SuggestSimplifications(const PointCloud &pc,
 			}
 		if(!failed)
 		{
-			suggestions->push_back(new SpherePrimitiveShape(sphere));
-			suggestions->back()->Release();
+			suggestions->push_back(std::make_shared<SpherePrimitiveShape>(sphere));
 		}
 	}
 	Plane plane;
@@ -208,8 +207,7 @@ void CylinderPrimitiveShape::SuggestSimplifications(const PointCloud &pc,
 			}
 		if(!failed)
 		{
-			suggestions->push_back(new PlanePrimitiveShape(plane));
-			suggestions->back()->Release();
+			suggestions->push_back(std::make_shared<PlanePrimitiveShape>(plane));
 		}
 	}
 	/*// We suggest a sphere if a curvature of radius along the height
@@ -227,25 +225,6 @@ void CylinderPrimitiveShape::SuggestSimplifications(const PointCloud &pc,
 			+ m_cylinder.AxisPosition();
 		Sphere sphere(center, m_cylinder.Radius() + radiusDiff);
 		suggestions->push_back(new SpherePrimitiveShape(sphere));
-		suggestions->back()->Release();
-	}
-
-	// We suggest a plane if the mean radius causes only a small error
-	// for this we need the angular extent in the curved direction of the cone
-	radiusDiff = (m_cylinder.Radius() - std::cos(radialExtent / 2)
-		* m_cylinder.Radius()) / 2;
-	if(radiusDiff < distThresh)
-	{
-		GfxTL::Vector2Df bboxCenter;
-		m_extBbox.Center(&bboxCenter);
-		Vec3f pos, normal;
-		InSpace(bboxCenter[0], bboxCenter[1] * m_cylinder.Radius(),
-			&pos, &normal);
-		// offset position
-		pos -= radiusDiff * normal;
-		Plane plane(pos, normal);
-		suggestions->push_back(new PlanePrimitiveShape(plane));
-		suggestions->back()->Release();
 	}*/
 }
 

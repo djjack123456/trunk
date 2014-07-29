@@ -202,8 +202,8 @@ bool Torus::InitAverage(const MiscLib::Vector< Vec3f > &samples)
 				{
 					double a01 = n0xn1 * dsamples[k + y];
 					double b01 = n0xn1 * dsamples[k + z];
-					if(GfxTL::Math< double >::Abs(a01) < 1e-6
-						|| GfxTL::Math< double >::Abs(b01) < 1e-6)
+					if(fabs(a01) < 1e-6
+						|| fabs(b01) < 1e-6)
 							continue;
 					double a0 = ((dsamples[y] - dsamples[x])
 						% dsamples[k + w]) * dsamples[k + y];

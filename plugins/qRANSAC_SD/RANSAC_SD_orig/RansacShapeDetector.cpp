@@ -37,13 +37,11 @@ RansacShapeDetector::RansacShapeDetector(const Options &options)
 RansacShapeDetector::~RansacShapeDetector()
 {
 	for(ConstructorsType::iterator i = m_constructors.begin(),
-		iend = m_constructors.end(); i != iend; ++i)
-		(*i)->Release();
+		iend = m_constructors.end(); i != iend; ++i);
 }
 
 void RansacShapeDetector::Add(PrimitiveShapeConstructor *c)
 {
-	c->AddRef();
 	m_constructors.push_back(c);
 	if(c->RequiredSamples() > m_reqSamples)
 		m_reqSamples = c->RequiredSamples();
@@ -128,7 +126,7 @@ void RansacShapeDetector::GenerateCandidates(
 			samplePoints[i + c] = globalOctree.at(samples[i]).normal;
 		}
 		// construct the different primitive shapes
-		PrimitiveShape *shape;
+		std::shared_ptr<PrimitiveShape> shape;
 		for(ConstructorsType::const_iterator i = m_constructors.begin(),
 			iend = m_constructors.end(); i != iend; ++i)
 		{
@@ -149,13 +147,10 @@ void RansacShapeDetector::GenerateCandidates(
 			}
 			if(!verified)
 			{
-				shape->Release();
 				continue;
 			}
 			Candidate cand(shape, node->Level());
-			cand.Indices(new MiscLib::RefCounted< MiscLib::Vector< size_t > >);
-			cand.Indices()->Release();
-			shape->Release();
+			cand.Indices(std::make_shared<MiscLib::Vector< size_t > >());
 			cand.ImproveBounds(octrees, pc, scoreVisitorCopy,
 				currentSize, m_options.m_bitmapEpsilon, 1);
 			if(cand.UpperBound() < m_options.m_minSupport)
@@ -446,14 +441,17 @@ nextCandidate:
 
 size_t
 RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
-	MiscLib::Vector< std::pair< RefCountPtr< PrimitiveShape >, size_t > > *shapes)
+	MiscLib::Vector< std::pair< std::shared_ptr< PrimitiveShape >, size_t > > *shapes, bool use_seed, size_t seed)
 {
 	size_t pcSize = endIdx - beginIdx;
 	/*
 	 * Initialization part
 	 */
-	srand((unsigned int)time(NULL));
-	rn_setseed((size_t)time(NULL));
+	if(!use_seed)
+		seed = time(NULL);
+	srand(seed);
+	rn_setseed(seed);
+	std::cout << "Use seed : " << seed << std::endl;
 
 	CandidatesType candidates;
 
@@ -631,7 +629,7 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 					oldScore = newScore;
 					oldSize = newSize;
 					std::pair< size_t, float > score;
-					PrimitiveShape *shape;
+					std::shared_ptr<PrimitiveShape> shape;
 					if(shape = Fit(allowDifferentShapes, *clone.Shape(),
 						pc, clone.Indices()->begin(), clone.Indices()->end(),
 						&score))
@@ -641,7 +639,6 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 							pc, 3 * m_options.m_epsilon, m_options.m_normalThresh,
 							m_options.m_bitmapEpsilon );
 						newSize = clone.Size();
-						shape->Release();
 						if(newScore > oldScore && newSize > m_options.m_minSupport)
 							clone.Clone(&candidates.back());
 					}
@@ -658,7 +655,7 @@ RansacShapeDetector::Detect(PointCloud &pc, size_t beginIdx, size_t endIdx,
 				std::cout << "ERROR: candidate size == 0 after fitting" << std::endl;
 			// best candidate is ok!
 			// remove the points
-			shapes->push_back(std::make_pair(RefCountPtr< PrimitiveShape >(candidates.back().Shape()),
+			shapes->push_back(std::make_pair(std::shared_ptr< PrimitiveShape >(candidates.back().Shape()),
 				candidates.back().Indices()->size()));
 			for(size_t i = 0; i < candidates.back().Indices()->size(); ++i)
 				shapeIndex[(*(candidates.back().Indices()))[i]] = numShapes;
@@ -937,15 +934,15 @@ bool RansacShapeDetector::DrawSamplesStratified(const IndexedOctreeType &oct,
 	return false;
 }
 
-PrimitiveShape *RansacShapeDetector::Fit(bool allowDifferentShapes,
+std::shared_ptr<PrimitiveShape> RansacShapeDetector::Fit(bool allowDifferentShapes,
 	const PrimitiveShape &initialShape, const PointCloud &pc,
 	MiscLib::Vector< size_t >::const_iterator begin,
 	MiscLib::Vector< size_t >::const_iterator end,
 	std::pair< size_t, float > *score) const
 {
 	if(!m_constructors.size())
-		return NULL;
-	PrimitiveShape *bestShape = NULL;
+		return nullptr;
+	std::shared_ptr<PrimitiveShape> bestShape = nullptr;
 	if(m_options.m_fitting == Options::LS_FITTING)
 		bestShape = initialShape.LSFit(pc, m_options.m_epsilon,
 			m_options.m_normalThresh, begin, end, score);

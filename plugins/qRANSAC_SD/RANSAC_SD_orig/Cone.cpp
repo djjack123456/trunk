@@ -429,7 +429,7 @@ void Cone::Parameters(const Vec3f &p, std::pair< float, float > *param) const
 		f = 0;
 	else
 		f = std::sqrt(f);
-	float sdist = abs(m_n2d[0] * f + ((height < 0)? -1 : 1) * m_n2d[1] * height);
+	float sdist = fabs(m_n2d[0] * f + ((height < 0)? -1 : 1) * m_n2d[1] * height);
 	float length = std::sqrt(sqrS + sdist * sdist);
 	param->first = /*(height < 0)? -length :*/ length;
 	param->second = angle;
@@ -468,7 +468,7 @@ void Cone::Parameters(const Vec3f &p, std::pair< float, float > *param) const
 		*param = std::make_pair(s.length(), angle);
 		return height;
 	}
-	*param = std::make_pair(*abs(lambda), angle);*/
+	*param = std::make_pair(*fabs(lambda), angle);*/
 }
 
 void Cone::RotateAngularDirection(float radians)
@@ -493,7 +493,7 @@ float ConeDistance(const float *param, const float *x)
 	Vec3f s;
 	for(unsigned int i = 0; i < 3; ++i)
 		s[i] = x[i] - param[i];
-	float g = abs(s[0] * param[3] + s[1] * param[4] + s[2] * param[5]);
+	float g = fabs(s[0] * param[3] + s[1] * param[4] + s[2] * param[5]);
 	float f = s.sqrLength() - (g * g);
 	if(f <= 0)
 		f = 0;
@@ -509,7 +509,7 @@ void ConeDistanceDerivatives(const float *param, const float *x,
 	Vec3f s;
 	for(unsigned int i = 0; i < 3; ++i)
 		s[i] = x[i] - param[i];
-	float g = abs(s[0] * param[3] + s[1] * param[4] + s[2] * param[5]);
+	float g = fabs(s[0] * param[3] + s[1] * param[4] + s[2] * param[5]);
 	float f = s.sqrLength() - (g * g);
 	if(f <= 0)
 		f = 0;

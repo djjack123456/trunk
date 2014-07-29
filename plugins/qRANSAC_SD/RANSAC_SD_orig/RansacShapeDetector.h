@@ -6,10 +6,11 @@
 #include <MiscLib/NoShrinkVector.h>
 #include <utility>
 #include "Candidate.h"
-#include <MiscLib/RefCountPtr.h>
 #include "Octree.h"
 #include <GfxTL/NullClass.h>
 #include <GfxTL/ImmediateTreeDataKernels.h>
+#include <memory>
+#include <vector>
 
 #ifndef DLL_LINKAGE
 #define DLL_LINKAGE
@@ -40,7 +41,7 @@ class DLL_LINKAGE RansacShapeDetector
 		virtual ~RansacShapeDetector();
 		void Add(PrimitiveShapeConstructor *c);
 		size_t Detect(PointCloud &pc, size_t begin, size_t end,
-			MiscLib::Vector< std::pair< MiscLib::RefCountPtr< PrimitiveShape >, size_t > > *shapes);
+			MiscLib::Vector< std::pair< std::shared_ptr< PrimitiveShape >, size_t > > *shapes, bool use_seed = false, size_t seed = 0);
 		void AutoAcceptSize(size_t s) { m_autoAcceptSize = s; }
 		size_t AutoAcceptSize() const { return m_autoAcceptSize; }
 		const Options &GetOptions() const { return m_options; }
@@ -48,12 +49,13 @@ class DLL_LINKAGE RansacShapeDetector
 	private:
 		typedef MiscLib::Vector< PrimitiveShapeConstructor * > ConstructorsType;
 		typedef MiscLib::NoShrinkVector< Candidate > CandidatesType;
+		//typedef std::vector< Candidate > CandidatesType;
 		bool DrawSamplesStratified(const IndexedOctreeType &oct,
 			size_t numSamples, size_t depth,
 			const MiscLib::Vector< int > &shapeIndex,
 			MiscLib::Vector< size_t > *samples,
 			const IndexedOctreeType::CellType **node) const;
-		PrimitiveShape *Fit(bool allowDifferentShapes,
+		std::shared_ptr<PrimitiveShape> Fit(bool allowDifferentShapes,
 			const PrimitiveShape &initialShape, const PointCloud &pc,
 			MiscLib::Vector< size_t >::const_iterator begin,
 			MiscLib::Vector< size_t >::const_iterator end,

@@ -6,6 +6,8 @@
 #include <cmath>
 #include <cassert>
 #include <GfxTL/VectorXD.h>
+#include <cmath>
+#include <cfloat>
 
 #ifndef DLL_LINKAGE
 #define DLL_LINKAGE
@@ -124,7 +126,7 @@ public:
    friend bool operator == (const Vec3f& v1, const Vec3f& v2)
    {
       for (int i = 0; i < 3; i++)
-         if (v1.vec[i] != v2.vec[i])
+         if (std::fabs(v1.vec[i] - v2.vec[i]) > FLT_EPSILON)
             return false;
       return true;
    }
@@ -132,28 +134,28 @@ public:
    friend bool operator < (const Vec3f& v1, const Vec3f& v2)
    {
       for (int i = 0; i < 3; i++)
-         if (v1.vec[i] >= v2.vec[i])
+         if (v2.vec[i] - v1.vec[i] > FLT_EPSILON)
             return false;
       return true;
    }
    friend bool operator <= (const Vec3f& v1, const Vec3f& v2)
    {
       for (int i = 0; i < 3; i++)
-         if (v1.vec[i] > v2.vec[i])
+         if (v2.vec[i] - v1.vec[i] > -FLT_EPSILON)
             return false;
       return true;
    }
    friend bool operator > (const Vec3f& v1, const Vec3f& v2)
    {
       for (int i = 0; i < 3; i++)
-         if (v1.vec[i] <= v2.vec[i])
+         if (v1.vec[i] - v2.vec[i] > FLT_EPSILON)
             return false;
       return true;
    }
    friend bool operator >= (const Vec3f& v1, const Vec3f& v2)
    {
       for (int i = 0; i < 3; i++)
-         if (v1.vec[i] < v2.vec[i])
+         if (v1.vec[i] - v2.vec[i] > -FLT_EPSILON)
             return false;
       return true;
    }

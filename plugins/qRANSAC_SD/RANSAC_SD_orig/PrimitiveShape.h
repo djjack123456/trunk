@@ -1,7 +1,6 @@
 #ifndef PRIMITIVESHAPE_HEADER
 #define PRIMITIVESHAPE_HEADER
 #include "basic.h"
-#include <MiscLib/RefCount.h>
 #include "PointCloud.h"
 #include <GfxTL/VectorXD.h>
 #include <utility>
@@ -12,7 +11,6 @@
 #include "LevMarFunc.h"
 #include <stdio.h>
 #include <MiscLib/NoShrinkVector.h>
-#include <MiscLib/RefCountPtr.h>
 
 #ifndef DLL_LINKAGE
 #define DLL_LINKAGE
@@ -30,14 +28,13 @@ class DLL_LINKAGE PrimitiveShapeVisitor;
  reduced)
 */
 class DLL_LINKAGE PrimitiveShape
-: public MiscLib::RefCount
 {
 public:
 	// returns a unique identifier of the shape type
 	virtual size_t Identifier() const = 0;
 	// returns the number of point samples required to uniquely determine a shape
 	virtual unsigned int RequiredSamples() const = 0;
-	virtual PrimitiveShape *Clone() const = 0;
+	virtual std::shared_ptr<PrimitiveShape> Clone() const = 0;
 	virtual float Distance(const Vec3f &p) const = 0;
 	virtual float SignedDistance(const Vec3f &p) const = 0;
 	virtual float NormalDeviation(const Vec3f &p,
@@ -56,7 +53,7 @@ public:
 	// have been moved to the front of indices and their number is returned.
 	// The remaining indices are stored at the end of the indices array
 	virtual size_t ConnectedComponent(const PointCloud &pc, float epsilon,
-		MiscLib::Vector< size_t > *indices, bool doFiltering = true, float* borderRatio = 0 ) = 0;
+		std::shared_ptr<MiscLib::Vector< size_t > > indices, bool doFiltering = true, float* borderRatio = 0 ) = 0;
 	virtual unsigned int ConfidenceTests(unsigned int numTests,
 		float epsilon, float normalThresh, float rms, const PointCloud &pc,
 		const MiscLib::Vector< size_t > &indices) const = 0;
@@ -67,7 +64,7 @@ public:
 		float normalThresh,
 		MiscLib::Vector< size_t >::const_iterator begin,
 		MiscLib::Vector< size_t >::const_iterator end) = 0;
-	virtual PrimitiveShape *LSFit(const PointCloud &pc, float epsilon,
+	virtual std::shared_ptr<PrimitiveShape> LSFit(const PointCloud &pc, float epsilon,
 		float normalThresh, MiscLib::Vector< size_t >::const_iterator begin,
 		MiscLib::Vector< size_t >::const_iterator end,
 		std::pair< size_t, float > *score) const = 0;
@@ -93,7 +90,7 @@ public:
 	virtual void SuggestSimplifications(const PointCloud &pc,
 		MiscLib::Vector< size_t >::const_iterator begin,
 		MiscLib::Vector< size_t >::const_iterator end, float distThresh,
-		MiscLib::Vector< MiscLib::RefCountPtr< PrimitiveShape > > *suggestions) const {}
+		MiscLib::Vector< std::shared_ptr< PrimitiveShape > > *suggestions) const {}
 	virtual void OptimizeParametrization(const PointCloud &pc,
 		size_t begin, size_t end, float epsilon) {}
 	// gets the 2D parametrization coordinates of a point p in 3-space (it is projected first)

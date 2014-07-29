@@ -108,7 +108,7 @@ private:
 				Vec3f s;
 				for(unsigned int j = 0; j < 3; ++j)
 					s[j] = begin[idx][j] - params[j];
-				ScalarType g = abs(s[0] * params[3] + s[1] * params[4] + s[2] * params[5]);
+				ScalarType g = fabs(s[0] * params[3] + s[1] * params[4] + s[2] * params[5]);
 				ScalarType f = s.sqrLength() - (g * g);
 				if(f <= 0)
 					f = 0;
@@ -134,7 +134,7 @@ private:
 				Vec3f s;
 				for(unsigned int j = 0; j < 3; ++j)
 					s[j] = begin[idx][j] - params[j];
-				ScalarType g = abs(s[0] * params[3] + s[1] * params[4] + s[2] * params[5]);
+				ScalarType g = fabs(s[0] * params[3] + s[1] * params[4] + s[2] * params[5]);
 				ScalarType ggradient[6];
 				for(unsigned int j = 0; j < 3; ++j)
 					ggradient[j] = -params[j + 3];
@@ -213,7 +213,7 @@ inline float Cone::Distance(const Vec3f &p) const
 	float db = m_n2d[1] * g;
 	if(g < 0 && da - db < 0) // is inside other side of cone -> disallow
 		return std::sqrt(sqrS);
-	return abs(da + db);
+	return fabs(da + db);
 }
 
 inline void Cone::Normal(const Vec3f &p, Vec3f *n) const
@@ -245,7 +245,7 @@ inline float Cone::DistanceAndNormal(const Vec3f &p, Vec3f *n) const
 	if(g < 0 && da - db < 0) // is inside other side of cone -> disallow
 		dist = std::sqrt(sqrS);
 	else
-		dist = abs(da + db);
+		dist = fabs(da + db);
 	// need normal
 	Vec3f plx = s - g * m_axisDir;
 	plx.normalize();
@@ -322,7 +322,7 @@ const Vec3f Cone::AngularDirection() const
 
 float Cone::RadiusAtLength(float length) const
 {
-	return std::sin(m_angle) * abs(length);
+	return std::sin(m_angle) * fabs(length);
 }
 
 float Cone::Height(const Vec3f &p) const
@@ -406,7 +406,7 @@ inline unsigned int Cone::Intersect(const Vec3f &p, const Vec3f &r,
 
     // Solve the quadratic.  Keep only those X for which Dot(A,X-V) >= 0.
 	unsigned int interCount = 0;
-    if (abs(fC2) >= 1e-7)
+    if (fabs(fC2) >= 1e-7)
     {
         // c2 != 0
         float fDiscr = fC1*fC1 - fC0*fC2;
@@ -464,7 +464,7 @@ inline unsigned int Cone::Intersect(const Vec3f &p, const Vec3f &r,
                 interCount = 0;
         }
     }
-    else if (abs(fC1) >= 1e-7)
+    else if (fabs(fC1) >= 1e-7)
     {
         // c2 = 0, c1 != 0 (D is a direction vector on the cone boundary)
 		lambda[0] = -(((float)0.5)*fC0/fC1);
@@ -478,7 +478,7 @@ inline unsigned int Cone::Intersect(const Vec3f &p, const Vec3f &r,
         else
             interCount = 0;
     }
-    else if (abs(fC0) >= 1e-7)
+    else if (fabs(fC0) >= 1e-7)
     {
         // c2 = c1 = 0, c0 != 0
         interCount = 0;

@@ -19,31 +19,31 @@ unsigned int SpherePrimitiveShapeConstructor::RequiredSamples() const
 	return 2;//4;
 }
 
-PrimitiveShape *SpherePrimitiveShapeConstructor::Construct(
+std::shared_ptr<PrimitiveShape> SpherePrimitiveShapeConstructor::Construct(
 	const MiscLib::Vector< Vec3f > &points,
 	const MiscLib::Vector< Vec3f > &normals) const
 {
 	Sphere sphere;
 	if(!sphere.Init2(points[0], points[1], normals[0], normals[1]))//points[2], points[3]))
-		return NULL;
+		return nullptr;
 	if(sphere.Radius() > m_maxSphereRadius)
-		return NULL;
-	return new SpherePrimitiveShape(sphere);
+		return nullptr;
+	return std::make_shared<SpherePrimitiveShape>(sphere);
 }
 
-PrimitiveShape *SpherePrimitiveShapeConstructor::Construct(
+std::shared_ptr<PrimitiveShape> SpherePrimitiveShapeConstructor::Construct(
 	const MiscLib::Vector< Vec3f > &samples) const
 {
 	Sphere sphere;
 	if(!sphere.Init(samples))
-		return NULL;
-	return new SpherePrimitiveShape(sphere);
+		return nullptr;
+	return std::make_shared<SpherePrimitiveShape>(sphere);
 }
 
-PrimitiveShape *SpherePrimitiveShapeConstructor::Deserialize(std::istream *i,
+std::shared_ptr<PrimitiveShape> SpherePrimitiveShapeConstructor::Deserialize(std::istream *i,
 	bool binary) const
 {
-	SpherePrimitiveShape *shape = new SpherePrimitiveShape();
+	std::shared_ptr<SpherePrimitiveShape> shape(new SpherePrimitiveShape());
 	shape->Deserialize(i, binary);
 	return shape;
 }

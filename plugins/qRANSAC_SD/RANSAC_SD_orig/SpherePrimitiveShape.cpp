@@ -163,9 +163,9 @@ bool SpherePrimitiveShape::Init(bool binary, std::istream *i)
 	return true;
 }
 
-PrimitiveShape *SpherePrimitiveShape::Clone() const
+std::shared_ptr<PrimitiveShape> SpherePrimitiveShape::Clone() const
 {
-	return new SpherePrimitiveShape(*this);
+	return std::make_shared<SpherePrimitiveShape>(*this);
 }
 
 float SpherePrimitiveShape::Distance(const Vec3f &p) const
@@ -232,7 +232,7 @@ bool SpherePrimitiveShape::Fit(const PointCloud &pc, float epsilon,
 	return false;
 }
 
-PrimitiveShape *SpherePrimitiveShape::LSFit(const PointCloud &pc, float epsilon,
+std::shared_ptr<PrimitiveShape> SpherePrimitiveShape::LSFit(const PointCloud &pc, float epsilon,
 	float normalThresh, MiscLib::Vector< size_t >::const_iterator begin,
 	MiscLib::Vector< size_t >::const_iterator end,
 	std::pair< size_t, float > *score) const
@@ -242,10 +242,10 @@ PrimitiveShape *SpherePrimitiveShape::LSFit(const PointCloud &pc, float epsilon,
 	if(fit.LeastSquaresFit(pc, begin, end))
 	{
 		score->first = -1;
-		return new SpherePrimitiveShape(fit);
+		return std::make_shared<SpherePrimitiveShape>(fit);
 	}
 	score->first = 0;
-	return NULL;
+	return nullptr;
 }
 
 void SpherePrimitiveShape::Serialize(std::ostream *o, bool binary) const
@@ -294,7 +294,7 @@ void SpherePrimitiveShape::Visit(PrimitiveShapeVisitor *visitor) const
 void SpherePrimitiveShape::SuggestSimplifications(const PointCloud &pc,
 	MiscLib::Vector< size_t >::const_iterator begin,
 	MiscLib::Vector< size_t >::const_iterator end, float distThresh,
-	MiscLib::Vector< MiscLib::RefCountPtr< PrimitiveShape > > *suggestions) const
+	MiscLib::Vector< std::shared_ptr< PrimitiveShape > > *suggestions) const
 {
 	// sample the bounding box in parameter space at 25 locations
 	// these points are used to estimate the other shapes
@@ -325,8 +325,7 @@ void SpherePrimitiveShape::SuggestSimplifications(const PointCloud &pc,
 			}
 		if(!failed)
 		{
-			suggestions->push_back(new PlanePrimitiveShape(plane));
-			suggestions->back()->Release();
+			suggestions->push_back(std::make_shared<PlanePrimitiveShape>(plane));
 		}
 	}
 
@@ -364,7 +363,6 @@ void SpherePrimitiveShape::SuggestSimplifications(const PointCloud &pc,
 			GfxTL::Vector3Df n = GfxTL::Vector3Df(eigenVectors[2]);
 			Plane plane(Vec3f(center.Data()), Vec3f(n.Data()));
 			suggestions->push_back(new PlanePrimitiveShape(plane));
-			suggestions->back()->Release();
 		}
 		else if(m_hasBitmap.first)
 		{
@@ -375,7 +373,6 @@ void SpherePrimitiveShape::SuggestSimplifications(const PointCloud &pc,
 			pos -= radiusDiff * normal;
 			Plane plane(pos, normal);
 			suggestions->push_back(new PlanePrimitiveShape(plane));
-			suggestions->back()->Release();
 		}
 		else if(m_hasBitmap.second)
 		{
@@ -386,7 +383,6 @@ void SpherePrimitiveShape::SuggestSimplifications(const PointCloud &pc,
 			pos -= radiusDiff * normal;
 			Plane plane(pos, normal);
 			suggestions->push_back(new PlanePrimitiveShape(plane));
-			suggestions->back()->Release();
 		}
 	}*/
 }

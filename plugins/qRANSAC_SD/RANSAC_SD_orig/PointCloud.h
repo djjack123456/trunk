@@ -55,6 +55,21 @@ struct DLL_LINKAGE Point {
 	{
 		return *reinterpret_cast< const GfxTL::Vector3Df * >(&pos);
 	}
+	union
+	{
+		union
+		{
+			struct
+			{
+				uint8_t b;
+				uint8_t g;
+				uint8_t r;
+				uint8_t a;
+			};
+			float rgb;
+		};
+		uint32_t rgba;
+	};
 };
 
 class DLL_LINKAGE PointCloud

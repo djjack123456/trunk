@@ -49,7 +49,7 @@ namespace GfxTL
 			for(ip = 0; ip < N - 1; ip++)
 			{
 				for(iq = ip + 1; iq < N; iq++)
-					sm += abs(a[iq][ip]);
+					sm += fabs(a[iq][ip]);
 			}
 			if(sm == T(0))
 				return true;
@@ -61,23 +61,23 @@ namespace GfxTL
 			{
 				for(iq = ip + 1; iq < N; iq++)
 				{
-					g = T(100) * abs(a[iq][ip]);
-					temp1 = abs((*d)[ip]) + g;
-					temp2 = abs((*d)[iq]) + g;
+					g = T(100) * fabs(a[iq][ip]);
+					temp1 = fabs((*d)[ip]) + g;
+					temp2 = fabs((*d)[iq]) + g;
 					if(i > 4 &&
-						temp1 == abs((*d)[ip]) &&
-						temp2 == abs((*d)[iq]))
+						temp1 == fabs((*d)[ip]) &&
+						temp2 == fabs((*d)[iq]))
 						a[iq][ip] = T(0);
-					else if(abs(a[iq][ip]) > tresh)
+					else if(fabs(a[iq][ip]) > tresh)
 					{
 						h = (*d)[iq] - (*d)[ip];
-						temp1 = (abs(h) + g);
-						if(temp1 == abs(h))
+						temp1 = (fabs(h) + g);
+						if(temp1 == fabs(h))
 							t = a[iq][ip] / h;
 						else
 						{
 							theta = T(0.5) * h / a[iq][ip];
-							t = T(1) / (abs(theta) + 
+							t = T(1) / (fabs(theta) + 
 								sqrt(T(1) + theta * theta));
 							if(theta < T(0))
 								t = -t;
@@ -182,7 +182,7 @@ namespace GfxTL
 			for(ip = 0; ip < N - 1; ip++)
 			{
 				for(iq = ip + 1; iq < N; iq++)
-					sm += abs((*a)[iq][ip]);
+					sm += fabs((*a)[iq][ip]);
 			}
 			if(sm == T(0))
 				return true;
@@ -194,23 +194,23 @@ namespace GfxTL
 			{
 				for(iq = ip + 1; iq < N; iq++)
 				{
-					g = T(100) * abs((*a)[iq][ip]);
-					temp1 = abs((*d)[ip]) + g;
-					temp2 = abs((*d)[iq]) + g;
+					g = T(100) * fabs((*a)[iq][ip]);
+					temp1 = fabs((*d)[ip]) + g;
+					temp2 = fabs((*d)[iq]) + g;
 					if(i > 4 &&
-						temp1 == abs((*d)[ip]) &&
-						temp2 == abs((*d)[iq]))
+						temp1 == fabs((*d)[ip]) &&
+						temp2 == fabs((*d)[iq]))
 						(*a)[iq][ip] = T(0);
-					else if(abs((*a)[iq][ip]) > tresh)
+					else if(fabs((*a)[iq][ip]) > tresh)
 					{
 						h = (*d)[iq] - (*d)[ip];
-						temp1 = (abs(h) + g);
-						if(temp1 == abs(h))
+						temp1 = (fabs(h) + g);
+						if(temp1 == fabs(h))
 							t = (*a)[iq][ip] / h;
 						else
 						{
 							theta = T(0.5) * h / (*a)[iq][ip];
-							t = T(1) / (abs(theta) + 
+							t = T(1) / (fabs(theta) + 
 								sqrt(T(1) + theta * theta));
 							if(theta < T(0))
 								t = -t;

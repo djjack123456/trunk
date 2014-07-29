@@ -4,6 +4,7 @@
 #include "Torus.h"
 #include "SimpleTorusParametrization.h"
 #include "LowStretchTorusParametrization.h"
+#include <memory>
 
 #ifndef DLL_LINKAGE
 #define DLL_LINKAGE
@@ -19,7 +20,7 @@ public:
 	TorusPrimitiveShape(const TorusPrimitiveShape &tps);
 	size_t Identifier() const;
 	unsigned int RequiredSamples() const { return Torus::RequiredSamples; }
-	PrimitiveShape *Clone() const;
+	std::shared_ptr<PrimitiveShape> Clone() const;
 	float Distance(const Vec3f &p) const;
 	float SignedDistance(const Vec3f &p) const;
 	float NormalDeviation(const Vec3f &p, const Vec3f &n) const;
@@ -36,7 +37,7 @@ public:
 		float normalThresh,
 		MiscLib::Vector< size_t >::const_iterator begin,
 		MiscLib::Vector< size_t >::const_iterator end);
-	PrimitiveShape *LSFit(const PointCloud &pc, float epsilon,
+	std::shared_ptr<PrimitiveShape> LSFit(const PointCloud &pc, float epsilon,
 		float normalThresh, MiscLib::Vector< size_t >::const_iterator begin,
 		MiscLib::Vector< size_t >::const_iterator end,
 		std::pair< size_t, float > *score) const;
@@ -51,7 +52,7 @@ public:
 	void SuggestSimplifications(const PointCloud &pc,
 		MiscLib::Vector< size_t >::const_iterator begin,
 		MiscLib::Vector< size_t >::const_iterator end, float distThresh,
-		MiscLib::Vector< MiscLib::RefCountPtr< PrimitiveShape > > *suggestions) const;
+		MiscLib::Vector< std::shared_ptr< PrimitiveShape > > *suggestions) const;
 	void OptimizeParametrization(const PointCloud &pc,
 		size_t begin, size_t end, float epsilon);
 	bool Similar(float tolerance, const TorusPrimitiveShape &shape) const;

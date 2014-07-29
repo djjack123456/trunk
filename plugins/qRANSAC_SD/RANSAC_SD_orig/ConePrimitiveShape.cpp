@@ -26,9 +26,9 @@ size_t ConePrimitiveShape::Identifier() const
 	return 3;
 }
 
-PrimitiveShape *ConePrimitiveShape::Clone() const
+std::shared_ptr<PrimitiveShape> ConePrimitiveShape::Clone() const
 {
-	return new ConePrimitiveShape(*this);
+	return std::make_shared<ConePrimitiveShape>(*this);
 }
 
 float ConePrimitiveShape::Distance(const Vec3f &p) const
@@ -93,7 +93,7 @@ bool ConePrimitiveShape::Fit(const PointCloud &pc, float epsilon,
 
 }
 
-PrimitiveShape *ConePrimitiveShape::LSFit(const PointCloud &pc, float epsilon,
+std::shared_ptr<PrimitiveShape> ConePrimitiveShape::LSFit(const PointCloud &pc, float epsilon,
 	float normalThresh, MiscLib::Vector< size_t >::const_iterator begin,
 	MiscLib::Vector< size_t >::const_iterator end,
 	std::pair< size_t, float > *score) const
@@ -102,10 +102,10 @@ PrimitiveShape *ConePrimitiveShape::LSFit(const PointCloud &pc, float epsilon,
 	if(fit.LeastSquaresFit(pc, begin, end))
 	{
 		score->first = -1;
-		return new ConePrimitiveShape(fit);
+		return std::make_shared<ConePrimitiveShape>(fit);
 	}
 	score->first = 0;
-	return NULL;
+	return nullptr;
 }
 
 LevMarFunc< float > *ConePrimitiveShape::SignedDistanceFunc() const
@@ -190,7 +190,7 @@ void ConePrimitiveShape::Visit(PrimitiveShapeVisitor *visitor) const
 void ConePrimitiveShape::SuggestSimplifications(const PointCloud &pc,
 	MiscLib::Vector< size_t >::const_iterator begin,
 	MiscLib::Vector< size_t >::const_iterator end, float distThresh,
-	MiscLib::Vector< MiscLib::RefCountPtr< PrimitiveShape > > *suggestions) const
+	MiscLib::Vector< std::shared_ptr< PrimitiveShape > > *suggestions) const
 {
 	// sample the bounding box in parameter space at 25 locations
 	// these points are used to estimate the other shapes
@@ -235,8 +235,7 @@ void ConePrimitiveShape::SuggestSimplifications(const PointCloud &pc,
 			}
 		if(!failed)
 		{
-			suggestions->push_back(new CylinderPrimitiveShape(cylinder));
-			suggestions->back()->Release();
+			suggestions->push_back(std::make_shared<CylinderPrimitiveShape>(cylinder));
 		}
 	}
 	Sphere sphere;
@@ -252,8 +251,7 @@ void ConePrimitiveShape::SuggestSimplifications(const PointCloud &pc,
 			}
 		if(!failed)
 		{
-			suggestions->push_back(new SpherePrimitiveShape(sphere));
-			suggestions->back()->Release();
+			suggestions->push_back(std::make_shared<SpherePrimitiveShape>(sphere));
 		}
 	}
 	Plane plane;
@@ -268,8 +266,7 @@ void ConePrimitiveShape::SuggestSimplifications(const PointCloud &pc,
 			}
 		if(!failed)
 		{
-			suggestions->push_back(new PlanePrimitiveShape(plane));
-			suggestions->back()->Release();
+			suggestions->push_back(std::make_shared<PlanePrimitiveShape>(plane));
 		}
 	}
 
@@ -295,7 +292,6 @@ void ConePrimitiveShape::SuggestSimplifications(const PointCloud &pc,
 		Cylinder cylinder(m_cone.AxisDirection(), m_cone.Center(), 
 			meanRadius);
 		suggestions->push_back(new CylinderPrimitiveShape(cylinder));
-		suggestions->back()->Release();
 	}
 
 	// We suggest a sphere if a curvature of mean radius along the height
@@ -311,7 +307,6 @@ void ConePrimitiveShape::SuggestSimplifications(const PointCloud &pc,
 			* m_cone.AxisDirection() + m_cone.Center();
 		Sphere sphere(center, sphereRadius + radiusDiff);
 		suggestions->push_back(new SpherePrimitiveShape(sphere));
-		suggestions->back()->Release();
 	}
 
 	// We suggest a plane if the mean radius causes only a small error
@@ -326,7 +321,6 @@ void ConePrimitiveShape::SuggestSimplifications(const PointCloud &pc,
 			&pos, &normal);
 		Plane plane(pos, normal);
 		suggestions->push_back(new PlanePrimitiveShape(plane));
-		suggestions->back()->Release();
 	}*/
 }
 
@@ -350,7 +344,7 @@ void ConePrimitiveShape::BitmapExtent(float epsilon,
 		// try to find cut in the outer regions
 		MiscLib::Vector< float > angularParams;//(params->size());
 		angularParams.reserve(params->size());
-		float outer = 3.f * std::max(abs(bbox->Min()[0]), abs(bbox->Max()[0])) / 4.f;
+		float outer = 3.f * std::max(fabs(bbox->Min()[0]), fabs(bbox->Max()[0])) / 4.f;
 		for(size_t i = 0; i < params->size(); ++i)
 			if((*params)[i].first > outer)
 				angularParams.push_back(((*params)[i].second
@@ -537,7 +531,7 @@ bool ConePrimitiveShape::InSpace(float length, float arcLength, Vec3f *p,
 		m_cone.AxisDirection()[1], m_cone.AxisDirection()[2]);
 	Vec3f vvec;
 	q.Rotate(m_cone.AngularDirection(), &vvec);
-	*p = std::sin(m_cone.Angle()) * abs(length) * vvec +
+	*p = std::sin(m_cone.Angle()) * fabs(length) * vvec +
 		std::cos(m_cone.Angle()) * length * m_cone.AxisDirection() +
 		m_cone.Center();
 	m_cone.Normal(*p, n);
@@ -566,14 +560,14 @@ bool ConePrimitiveShape::InSpace(size_t u, size_t v, float epsilon,
 	}
 	if(angle > 2 * float(M_PI))
 		return false;
-	//float angle = ((v * epsilon) / m_cone.RadiusAtLength(std::max(abs(bbox.Min()[0]), abs(bbox.Max()[0])))
+	//float angle = ((v * epsilon) / m_cone.RadiusAtLength(std::max(fabs(bbox.Min()[0]), fabs(bbox.Max()[0])))
 	//	+ bbox.Min()[1]);
 	GfxTL::Quaternion< float > q;
 	q.RotationRad(angle, m_cone.AxisDirection()[0],
 		m_cone.AxisDirection()[1], m_cone.AxisDirection()[2]);
 	Vec3f vvec;
 	q.Rotate(m_cone.AngularDirection(), &vvec);
-	*p = std::sin(m_cone.Angle()) * abs(length) * vvec +
+	*p = std::sin(m_cone.Angle()) * fabs(length) * vvec +
 		std::cos(m_cone.Angle()) * length * m_cone.AxisDirection() +
 		m_cone.Center();
 	// TODO: this is very lazy and should be optimized!

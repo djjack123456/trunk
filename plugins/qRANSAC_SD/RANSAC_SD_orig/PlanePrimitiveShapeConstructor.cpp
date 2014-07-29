@@ -13,27 +13,27 @@ unsigned int PlanePrimitiveShapeConstructor::RequiredSamples() const
 	return 3;
 }
 
-PrimitiveShape *PlanePrimitiveShapeConstructor::Construct(
+std::shared_ptr<PrimitiveShape> PlanePrimitiveShapeConstructor::Construct(
 	const MiscLib::Vector< Vec3f > &points, const MiscLib::Vector< Vec3f > &) const
 {
-	return new PlanePrimitiveShape(points[0], points[1], points[2]);
+	return std::make_shared<PlanePrimitiveShape>(points[0], points[1], points[2]);
 }
 
-PrimitiveShape *PlanePrimitiveShapeConstructor::Construct(
+std::shared_ptr<PrimitiveShape> PlanePrimitiveShapeConstructor::Construct(
 	const MiscLib::Vector< Vec3f > &samples) const
 {
 	Plane plane;
 	if(!plane.Init(samples))
-		return NULL;
-	return new PlanePrimitiveShape(plane);
+		return nullptr;
+	return std::make_shared<PlanePrimitiveShape>(plane);
 }
 
-PrimitiveShape *PlanePrimitiveShapeConstructor::Deserialize(std::istream *i,
+std::shared_ptr<PrimitiveShape> PlanePrimitiveShapeConstructor::Deserialize(std::istream *i,
 	bool binary) const
 {
 	Plane plane;
 	plane.Init(binary, i);
-	PlanePrimitiveShape *shape = new PlanePrimitiveShape(plane);
+	std::shared_ptr<PlanePrimitiveShape> shape(new PlanePrimitiveShape(plane));
 	return shape;
 }
 

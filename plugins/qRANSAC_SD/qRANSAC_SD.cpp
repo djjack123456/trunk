@@ -62,6 +62,7 @@
 #else
 #include <time.h>
 #endif
+#include <memory>
 
 qRansacSD::qRansacSD(QObject* parent/*=0*/)
 	: QObject(parent)
@@ -90,7 +91,7 @@ void qRansacSD::getActions(QActionGroup& group)
 	group.addAction(m_action);
 }
 
-static MiscLib::Vector< std::pair< MiscLib::RefCountPtr< PrimitiveShape >, size_t > >* s_shapes; // stores the detected shapes
+static MiscLib::Vector< std::pair< std::shared_ptr< PrimitiveShape >, size_t > >* s_shapes; // stores the detected shapes
 static size_t s_remainingPoints = 0;
 static RansacShapeDetector* s_detector = 0;
 static PointCloud* s_cloud = 0;
@@ -287,7 +288,7 @@ void qRansacSD::doAction()
 		detector.Add(new TorusPrimitiveShapeConstructor());
 
 	size_t remaining = count;
-	typedef std::pair< MiscLib::RefCountPtr< PrimitiveShape >, size_t > DetectedShape;
+	typedef std::pair< std::shared_ptr< PrimitiveShape >, size_t > DetectedShape;
 	MiscLib::Vector< DetectedShape > shapes; // stores the detected shapes
 
 	// run detection
@@ -375,7 +376,7 @@ void qRansacSD::doAction()
 		ccHObject* group = 0;
 		for (MiscLib::Vector<DetectedShape>::const_iterator it = shapes.begin(); it != shapes.end(); ++it)
 		{
-			const PrimitiveShape* shape = it->first;
+			const std::shared_ptr<PrimitiveShape> shape = it->first;
 			size_t shapePointsCount = it->second;
 
 			//too many points?!
@@ -423,7 +424,8 @@ void qRansacSD::doAction()
 			{
 			case 0: //plane
 				{
-				const PlanePrimitiveShape* plane = static_cast<const PlanePrimitiveShape*>(shape);
+				std::shared_ptr<PlanePrimitiveShape> plane = std::static_pointer_cast<PlanePrimitiveShape>(shape);
+				break;
 				Vec3f G = plane->Internal().getPosition();
 				Vec3f N = plane->Internal().getNormal();
 				Vec3f X = plane->getXDim();
@@ -473,7 +475,7 @@ void qRansacSD::doAction()
 
 			case 1: //sphere
 				{
-				const SpherePrimitiveShape* sphere = static_cast<const SpherePrimitiveShape*>(shape);
+				std::shared_ptr<SpherePrimitiveShape> sphere = std::static_pointer_cast<SpherePrimitiveShape>(shape);
 				float radius = sphere->Internal().Radius();
 				Vec3f CC = sphere->Internal().Center();
 
@@ -491,7 +493,7 @@ void qRansacSD::doAction()
 
 			case 2: //cylinder
 				{
-				const CylinderPrimitiveShape* cyl = static_cast<const CylinderPrimitiveShape*>(shape);
+				std::shared_ptr<CylinderPrimitiveShape> cyl = std::static_pointer_cast<CylinderPrimitiveShape>(shape);
 				Vec3f G = cyl->Internal().AxisPosition();
 				Vec3f N = cyl->Internal().AxisDirection();
 				Vec3f X = cyl->Internal().AngularDirection();
@@ -519,7 +521,7 @@ void qRansacSD::doAction()
 
 			case 3: //cone
 				{
-				const ConePrimitiveShape* cone = static_cast<const ConePrimitiveShape*>(shape);
+				std::shared_ptr<ConePrimitiveShape> cone = std::static_pointer_cast<ConePrimitiveShape>(shape);
 				Vec3f CC = cone->Internal().Center();
 				Vec3f CA = cone->Internal().AxisDirection();
 				float alpha = cone->Internal().Angle();
@@ -561,7 +563,7 @@ void qRansacSD::doAction()
 
 			case 4: //torus
 				{
-				const TorusPrimitiveShape* torus = static_cast<const TorusPrimitiveShape*>(shape);
+					std::shared_ptr<TorusPrimitiveShape> torus = std::static_pointer_cast<TorusPrimitiveShape>(shape);
 				if (torus->Internal().IsAppleShaped())
 				{
 					m_app->dispToConsole("[qRansacSD] Apple-shaped torus are not handled by CloudCompare!",ccMainAppInterface::WRN_CONSOLE_MESSAGE);

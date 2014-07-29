@@ -1,14 +1,13 @@
 #ifndef SCOREPRIMITIVESHAPEVISITOR_HEADER
 #define SCOREPRIMITIVESHAPEVISITOR_HEADER
 #include "PrimitiveShapeVisitor.h"
-#include <MiscLib/RefCounted.h>
-#include <MiscLib/RefCountPtr.h>
 #include <MiscLib/NoShrinkVector.h>
 #include "PlanePrimitiveShape.h"
 #include "SpherePrimitiveShape.h"
 #include "CylinderPrimitiveShape.h"
 #include "ConePrimitiveShape.h"
 #include "TorusPrimitiveShape.h"
+#include <memory>
 
 template< class PointCompT, class OctreeT >
 class ScorePrimitiveShapeVisitorImpl
@@ -17,13 +16,13 @@ class ScorePrimitiveShapeVisitorImpl
 public:
 	typedef PointCompT PointCompatibilityFunc;
 	typedef OctreeT OctreeType;
-	typedef MiscLib::RefCounted< MiscLib::Vector< size_t > > IndicesType;
+	typedef MiscLib::Vector< size_t > IndicesType;
 	ScorePrimitiveShapeVisitorImpl(float distThresh,
 		float normalThresh) : m_pointComp(distThresh, normalThresh) {}
 	void SetOctree(const OctreeT &oct) { m_oct = &oct; }
 	const OctreeT &GetOctree() const { return *m_oct; }
-	IndicesType *GetIndices() { return m_indices; }
-	void SetIndices(IndicesType *indices) { m_indices = indices; }
+	std::shared_ptr<IndicesType> GetIndices() { return m_indices; }
+	void SetIndices(std::shared_ptr<IndicesType> indices) { m_indices = indices; }
 	void SetShapeIndex(const MiscLib::Vector< int > &shapeIndex)
 	{ m_shapeIndex = &shapeIndex; }
 	const MiscLib::Vector< int > &GetShapeIndex() { return *m_shapeIndex; }
@@ -52,7 +51,7 @@ public:
 private:
 	PointCompatibilityFunc m_pointComp;
 	const OctreeT *m_oct;
-	/*MiscLib::RefCountPtr<*/ IndicesType /*>*/ *m_indices;
+	std::shared_ptr< IndicesType > m_indices;
 	const MiscLib::Vector< int > *m_shapeIndex;
 	//size_t m_upperBound;
 	//size_t m_sampled;

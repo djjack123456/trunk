@@ -33,9 +33,9 @@ class DLL_LINKAGE BitmapPrimitiveShape
 public:
 	bool Init(bool binary, std::istream *i);
 	size_t ConnectedComponent(const PointCloud &pc, float epsilon,
-		MiscLib::Vector< size_t > *indices, bool doFiltering = true, float* borderRatio = 0 );
+		std::shared_ptr<MiscLib::Vector< size_t > > indices, bool doFiltering = true, float* borderRatio = 0 );
 	size_t AllConnectedComponents(const PointCloud &pc, float epsilon, BitmapInfo& bitmapInfo,
-		MiscLib::Vector< size_t > *indices, MiscLib::Vector< int >& componentsImg, 
+		std::shared_ptr<MiscLib::Vector< size_t > >indices, MiscLib::Vector< int >& componentsImg, 
 		MiscLib::Vector< std::pair< int, size_t > >& labels, bool doFiltering = true );
 	void TrimmingPolygons(const PointCloud &pc, float epsilon,
 		size_t begin, size_t end,

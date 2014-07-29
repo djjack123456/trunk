@@ -3,6 +3,7 @@
 #include "BitmapPrimitiveShape.h"
 #include "Cylinder.h"
 #include "LevMarFunc.h"
+#include <memory>
 
 #ifndef DLL_LINKAGE
 #define DLL_LINKAGE
@@ -16,7 +17,7 @@ public:
 	size_t Identifier() const;
 	unsigned int RequiredSamples() const { return Cylinder::RequiredSamples; }
 	CylinderPrimitiveShape(const Cylinder &cylinder);
-	PrimitiveShape *Clone() const;
+	std::shared_ptr<PrimitiveShape> Clone() const;
 	bool Init(const Vec3f &pointA, const Vec3f &pointB,
 		const Vec3f &normalA, const Vec3f &normalB);
 	bool Init(bool binary, std::istream *i) { return BitmapPrimitiveShape::Init(binary, i); }
@@ -34,7 +35,7 @@ public:
 	bool Fit(const PointCloud &pc, float epsilon, float normalThresh,
 		MiscLib::Vector< size_t >::const_iterator begin,
 		MiscLib::Vector< size_t >::const_iterator end);
-	PrimitiveShape *LSFit(const PointCloud &pc, float epsilon,
+	std::shared_ptr<PrimitiveShape> LSFit(const PointCloud &pc, float epsilon,
 		float normalThresh,
 		MiscLib::Vector< size_t >::const_iterator begin,
 		MiscLib::Vector< size_t >::const_iterator end,
@@ -51,7 +52,7 @@ public:
 	void SuggestSimplifications(const PointCloud &pc,
 		MiscLib::Vector< size_t >::const_iterator begin,
 		MiscLib::Vector< size_t >::const_iterator end, float distThresh,
-		MiscLib::Vector< MiscLib::RefCountPtr< PrimitiveShape > > *suggestions) const;
+		MiscLib::Vector< std::shared_ptr< PrimitiveShape > > *suggestions) const;
 	bool Similar(float tolerance,
 		const CylinderPrimitiveShape &shape) const;
 	const Cylinder &Internal() const { return m_cylinder; }

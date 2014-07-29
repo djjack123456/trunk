@@ -25,7 +25,7 @@ public:
 		float normalThresh, MiscLib::Vector< size_t >::const_iterator begin,
 		MiscLib::Vector< size_t >::const_iterator end,
 		std::pair< size_t, float > *score,
-		MiscLib::Vector< size_t > *indices = NULL)
+		std::shared_ptr<MiscLib::Vector< size_t > >indices = nullptr)
 	{
 		Vec3f n;
 		size_t size = end - begin;
@@ -33,7 +33,7 @@ public:
 		{
 			float d = shape.DistanceAndNormal(pc[begin[iter]].pos, &n);
 			float nd = n.dot(pc[begin[iter]].normal);
-			if(d < epsilon && abs(nd) > normalThresh)
+			if(d < epsilon && fabs(nd) > normalThresh)
 			{
 				++score->first;
 				score->second += weigh(d,epsilon);

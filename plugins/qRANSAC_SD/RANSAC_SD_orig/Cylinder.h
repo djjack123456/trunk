@@ -172,7 +172,7 @@ inline float Cylinder::Distance(const Vec3f &p) const
 	Vec3f diff = p - m_axisPos;
 	float lambda = m_axisDir.dot(diff);
 	float axisDist = (diff - lambda * m_axisDir).length();
-	return abs(axisDist - m_radius);
+	return fabs(axisDist - m_radius);
 }
 
 inline void Cylinder::Normal(const Vec3f &p, Vec3f *normal) const
@@ -191,7 +191,7 @@ inline float Cylinder::DistanceAndNormal(const Vec3f &p, Vec3f *normal) const
 	float axisDist = normal->length();
 	if(axisDist > 0) 
 		*normal /= axisDist;
-	return abs(axisDist - m_radius);
+	return fabs(axisDist - m_radius);
 }
 
 inline float Cylinder::SignedDistance(const Vec3f &p) const
@@ -244,7 +244,7 @@ inline unsigned int Cylinder::Intersect(const Vec3f &p, const Vec3f &r,
     // unit-length direction.
     float fDz = m_axisDir.dot(r);
 
-    if(abs(fDz) >= 1.f - 1e-7f)
+    if(fabs(fDz) >= 1.f - 1e-7f)
         // The line is parallel to the cylinder axis.
 		return 0;
 

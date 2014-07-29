@@ -1,15 +1,16 @@
 #ifndef CANDIDATE_HEADER
 #define CANDIDATE_HEADER
 #include "ScoreComputer.h"
-#include <MiscLib/RefCountPtr.h>
 #include "PrimitiveShape.h"
 #include <MiscLib/Vector.h>
 #include <limits>
-#include <MiscLib/RefCounted.h>
 #include <MiscLib/Random.h>
 #include <MiscLib/NoShrinkVector.h>
 #include "Octree.h"
 #include <algorithm>
+#include <memory>
+#include <cfloat>
+#include <cmath>
 
 #ifndef DLL_LINKAGE
 #define DLL_LINKAGE
@@ -19,15 +20,15 @@ class DLL_LINKAGE Candidate
 {
 public:
 	Candidate();
-	Candidate(PrimitiveShape *shape, size_t level);
-	PrimitiveShape *Shape() { return m_shape; }
-	void Shape(PrimitiveShape *shape) { m_shape = shape; }
+	Candidate(std::shared_ptr<PrimitiveShape> shape, size_t level);
+	std::shared_ptr<PrimitiveShape> Shape() { return m_shape; }
+	void Shape(std::shared_ptr<PrimitiveShape> shape) { m_shape = shape; }
 	float LowerBound() const { return m_lowerBound; }
 	float UpperBound() const { return m_upperBound; }
-	MiscLib::RefCounted< MiscLib::Vector< size_t > > *Indices() { return m_indices; }
-	void Indices(MiscLib::RefCounted< MiscLib::Vector< size_t > > *indices) { m_indices = indices; }
+	std::shared_ptr< MiscLib::Vector< size_t > > Indices() { return m_indices; }
+	void Indices(std::shared_ptr< MiscLib::Vector< size_t > > indices) { m_indices = indices; }
 	size_t ComputedSubsets() const { return m_subset; }
-	float ExpectedValue() const { return (m_lowerBound + m_upperBound) / 2.f; }
+	inline float ExpectedValue() const { return int(m_lowerBound + m_upperBound) / 2.f; }
 	void SetSubset(size_t subset) { m_subset = subset; }
 	size_t Level() const { return m_level; }
 	void Reset();
@@ -79,45 +80,52 @@ private:
 	float GetPseudoVariance( const PointCloud &pc );
 
 private:
-	MiscLib::RefCountPtr< PrimitiveShape > m_shape;
+	std::shared_ptr< PrimitiveShape > m_shape;
 	size_t m_subset;
 	float m_lowerBound;
 	float m_upperBound;
-	MiscLib::RefCountPtr< MiscLib::RefCounted< MiscLib::Vector< size_t > > > m_indices;
+	std::shared_ptr< MiscLib::Vector< size_t > > m_indices;
 	size_t m_level;
 	bool m_hasConnectedComponent;
 	size_t m_score;
 };
 
+#include <cstdio>
 bool Candidate::operator<(const Candidate &c) const
 {
+	//float a = ExpectedValue(), b = c.ExpectedValue();
+	//return (b - a) > ((std::fabs(a) < std::fabs(b) ? std::fabs(b) : std::fabs(a)) * FLT_EPSILON);*/
+	//return (c.ExpectedValue() - ExpectedValue()) > 0.0001;
 	return ExpectedValue() < c.ExpectedValue();
 }
 
 bool Candidate::operator>(const Candidate &c) const
 {
+	//float a = ExpectedValue(), b = c.ExpectedValue();
+	//return (a - b) > ((std::fabs(a) < std::fabs(b) ? std::fabs(b) : std::fabs(a)) * FLT_EPSILON);
+	//return (ExpectedValue() - c.ExpectedValue()) > 0.0001;
 	return ExpectedValue() > c.ExpectedValue();
 }
 
 bool Candidate::operator<=(const Candidate &c) const
 {
+	//return (c.ExpectedValue() - ExpectedValue()) > -0.0001;
 	return ExpectedValue() <= c.ExpectedValue();
 }
 
 bool Candidate::operator>=(const Candidate &c) const
 {
+	//return (ExpectedValue() - c.ExpectedValue()) > -0.0001;
 	return ExpectedValue() >= c.ExpectedValue();
 }
 
 void Candidate::Clone(Candidate *c) const
 {
 	c->m_shape = m_shape->Clone();
-	c->m_shape->Release();
 	c->m_subset = m_subset;
 	c->m_lowerBound = m_lowerBound;
 	c->m_upperBound = m_upperBound;
-	c->m_indices = new MiscLib::RefCounted< MiscLib::Vector< size_t > >(*m_indices);
-	c->m_indices->Release();
+	c->m_indices = std::make_shared<MiscLib::Vector< size_t > >(*m_indices);
 	c->m_level = m_level;;
 	c->m_hasConnectedComponent = m_hasConnectedComponent;
 	c->m_score = m_score;

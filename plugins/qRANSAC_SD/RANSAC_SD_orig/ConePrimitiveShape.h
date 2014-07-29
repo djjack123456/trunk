@@ -3,6 +3,7 @@
 #include "BitmapPrimitiveShape.h"
 #include "Cone.h"
 #include "LevMarFunc.h"
+#include <memory>
 
 #ifndef DLL_LINKAGE
 #define DLL_LINKAGE
@@ -15,7 +16,7 @@ public:
 	size_t Identifier() const;
 	unsigned int RequiredSamples() const { return Cone::RequiredSamples; }
 	ConePrimitiveShape(const Cone &cone);
-	PrimitiveShape *Clone() const;
+	std::shared_ptr<PrimitiveShape> Clone() const;
 	float Distance(const Vec3f &p) const;
 	float SignedDistance(const Vec3f &p) const;
 	float NormalDeviation(const Vec3f &p, const Vec3f &n) const;
@@ -30,7 +31,7 @@ public:
 	bool Fit(const PointCloud &pc, float epsilon, float normalThresh,
 		MiscLib::Vector< size_t >::const_iterator begin,
 		MiscLib::Vector< size_t >::const_iterator end);
-	PrimitiveShape *LSFit(const PointCloud &pc, float epsilon,
+	std::shared_ptr<PrimitiveShape> LSFit(const PointCloud &pc, float epsilon,
 		float normalThresh,
 		MiscLib::Vector< size_t >::const_iterator begin,
 		MiscLib::Vector< size_t >::const_iterator end,
@@ -47,7 +48,7 @@ public:
 	void SuggestSimplifications(const PointCloud &pc,
 		MiscLib::Vector< size_t >::const_iterator begin,
 		MiscLib::Vector< size_t >::const_iterator end, float distThresh,
-		MiscLib::Vector< MiscLib::RefCountPtr< PrimitiveShape > > *suggestions) const;
+		MiscLib::Vector< std::shared_ptr< PrimitiveShape > > *suggestions) const;
 	bool Similar(float tolerance, const ConePrimitiveShape &shape) const;
 	const Cone &Internal() const { return m_cone; }
 

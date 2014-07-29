@@ -130,19 +130,28 @@ void LowStretchSphereParametrization::Optimize(IteratorT begin, IteratorT end,
 			&& uangle * m_sphere->Radius() > float(-M_PI) * m_sphere->Radius() + 2 * epsilon)
 			vangles.push_back(std::atan2(l[1], l[0]));
 	}
-	std::sort(vangles.begin(), vangles.end());
-	// try to find a large gap
-	float maxGap = vangles.front() + 2 * float(M_PI) - vangles.back();
-	float lower = vangles.back(), upper = vangles.front() + 2 * float(M_PI);
-	for(size_t i = 1; i < vangles.size(); ++i)
+	float lower, upper;
+	if(vangles.size())
 	{
-		float gap = vangles[i] - vangles[i - 1];
-		if(gap > maxGap)
+		std::sort(vangles.begin(), vangles.end());
+		// try to find a large gap
+		float maxGap = vangles.front() + 2 * float(M_PI) - vangles.back();
+		float lower = vangles.back(), upper = vangles.front() + 2 * float(M_PI);
+		for(size_t i = 1; i < vangles.size(); ++i)
 		{
-			maxGap = gap;
-			lower = vangles[i - 1];
-			upper = vangles[i];
+			float gap = vangles[i] - vangles[i - 1];
+			if(gap > maxGap)
+			{
+				maxGap = gap;
+				lower = vangles[i - 1];
+				upper = vangles[i];
+			}
 		}
+	}
+	else
+	{
+		lower = 0.0;
+		upper = 2 * float(M_PI);
 	}
 	// reparameterize by rotating the frame on the normal such that x direction
 	// coincides with the gap
