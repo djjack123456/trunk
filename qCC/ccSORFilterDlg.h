@@ -15,24 +15,18 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_LAS_FILTER_HEADER
-#define CC_LAS_FILTER_HEADER
+#ifndef CC_SOR_FILTER_DLG_HEADER
+#define CC_SOR_FILTER_DLG_HEADER
 
-#include "FileIOFilter.h"
+#include <ui_sorFilterDlg.h>
 
-#ifdef CC_LAS_SUPPORT
-
-//! ASPRS LAS point cloud file I/O filter
-class LASFilter : public FileIOFilter
+//! Dialog to choose which dimension(s) (X, Y or Z) should be exported as SF(s)
+class ccSORFilterDlg : public QDialog, public Ui::SorFilterDialog
 {
 public:
 
-	//inherited from FileIOFilter
-	virtual CC_FILE_ERROR loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog = true, bool* coordinatesShiftEnabled = 0, CCVector3d* coordinatesShift = 0);
-	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, QString filename);
-
+	//! Default constructor
+	ccSORFilterDlg(QWidget* parent = 0);
 };
 
-#endif //CC_LAS_SUPPORT
-
-#endif
+#endif //CC_SOR_FILTER_DLG_HEADER

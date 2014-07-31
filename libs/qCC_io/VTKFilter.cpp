@@ -33,9 +33,9 @@
 //System
 #include <string.h>
 
-CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const char* filename)
+CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, QString filename)
 {
-	if (!entity || !filename)
+	if (!entity || filename.isEmpty())
 		return CC_FERR_BAD_ARGUMENT;
 
 	//look for either a cloud or a mesh
@@ -222,7 +222,7 @@ static bool GetNextNonEmptyLine(QTextStream& stream, QString& line)
 	return true;
 }
 
-CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR VTKFilter::loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
 	//open ASCII file for reading
 	QFile file(filename);
@@ -749,9 +749,11 @@ CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bo
 
 		//DGM: normals can be per-vertex or per-triangle so it's better to let the user do it himself later
 		//Moreover it's not always good idea if the user doesn't want normals (especially in ccViewer!)
-		//if (!mesh->hasNormals())
-		//	mesh->computeNormals();
-		ccLog::Warning("[VTK] Mesh has no normal! You can manually compute them (select it then call \"Edit > Normals > Compute\")");
+		if (!mesh->hasNormals())
+		{
+			//	mesh->computeNormals();
+			ccLog::Warning("[VTK] Mesh has no normal! You can manually compute them (select it then call \"Edit > Normals > Compute\")");
+		}
 		mesh->showNormals(mesh->hasNormals());
 		if (vertices->hasScalarFields())
 		{

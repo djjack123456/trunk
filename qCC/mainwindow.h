@@ -283,6 +283,7 @@ protected slots:
 	void doActionSFGaussianFilter();
 	void doActionSFBilateralFilter();
 	void doActionSFConvertToRGB();
+	void doActionSFConvertToRandomRGB();
 	void doActionRenameSF();
 	void doActionOpenColorScalesManager();
 	void doActionAddIdField();
@@ -343,6 +344,7 @@ protected slots:
 	void doActionApplyScale();
 	void doActionEditGlobalShiftAndScale();
 	void doActionMatchBBCenters();
+	void doActionFilterNoise();
 	void doActionUnroll();
 	void doActionCreateGBLSensor();
 	void doActionCreateCameraSensor();
@@ -433,7 +435,9 @@ protected:
 	**/
 	static void RemoveSiblingsFromCCObjectList(ccHObject::Container& ccObjects);
 
-	//! Returns a default first guess for algorithms kernel size
+	//! Returns a default first guess for algorithms kernel size (one cloud)
+	static PointCoordinateType GetDefaultCloudKernelSize(ccGenericPointCloud* cloud);
+	//! Returns a default first guess for algorithms kernel size (several clouds)
 	static PointCoordinateType GetDefaultCloudKernelSize(const ccHObject::Container& entities);
 
 	//! Creates point clouds from multiple 'components'

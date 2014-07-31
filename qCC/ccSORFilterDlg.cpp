@@ -15,24 +15,13 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_LAS_FILTER_HEADER
-#define CC_LAS_FILTER_HEADER
+#include "ccSORFilterDlg.h"
 
-#include "FileIOFilter.h"
-
-#ifdef CC_LAS_SUPPORT
-
-//! ASPRS LAS point cloud file I/O filter
-class LASFilter : public FileIOFilter
+ccSORFilterDlg::ccSORFilterDlg(QWidget* parent/*=0*/)
+	: QDialog(parent)
+	, Ui::SorFilterDialog()
 {
-public:
+	setupUi(this);
 
-	//inherited from FileIOFilter
-	virtual CC_FILE_ERROR loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog = true, bool* coordinatesShiftEnabled = 0, CCVector3d* coordinatesShift = 0);
-	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, QString filename);
-
-};
-
-#endif //CC_LAS_SUPPORT
-
-#endif
+	setWindowFlags(Qt::Tool);
+}

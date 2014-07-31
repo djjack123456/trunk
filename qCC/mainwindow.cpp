@@ -122,6 +122,7 @@
 #include "ccAdjustZoomDlg.h"
 #include "ccBoundingBoxEditorDlg.h"
 #include "ccColorLevelsDlg.h"
+#include "ccSORFilterDlg.h"
 #include <ui_aboutDlg.h>
 
 //other
@@ -824,6 +825,7 @@ void MainWindow::connectActions()
 	connect(actionViewFromSensor,				SIGNAL(triggered()),	this,		SLOT(doActionSetViewFromSensor()));
 	//"Edit > Scalar fields" menu
 	connect(actionShowHistogram,				SIGNAL(triggered()),	this,		SLOT(showSelectedEntitiesHistogram()));
+	connect(actionComputeStatParams,			SIGNAL(triggered()),	this,		SLOT(doActionComputeStatParams()));
 	connect(actionSFGradient,					SIGNAL(triggered()),	this,		SLOT(doActionSFGradient()));
 	connect(actionGaussianFilter,				SIGNAL(triggered()),	this,		SLOT(doActionSFGaussianFilter()));
 	connect(actionBilateralFilter,				SIGNAL(triggered()),	this,		SLOT(doActionSFBilateralFilter()));
@@ -832,6 +834,7 @@ void MainWindow::connectActions()
 	connect(actionScalarFieldArithmetic,		SIGNAL(triggered()),	this,		SLOT(doActionScalarFieldArithmetic()));
 	connect(actionScalarFieldFromColor,			SIGNAL(triggered()),	this,		SLOT(doActionScalarFieldFromColor()));
 	connect(actionConvertToRGB,					SIGNAL(triggered()),	this,		SLOT(doActionSFConvertToRGB()));
+	connect(actionConvertToRandomRGB,			SIGNAL(triggered()),	this,		SLOT(doActionSFConvertToRandomRGB()));
 	connect(actionRenameSF,						SIGNAL(triggered()),	this,		SLOT(doActionRenameSF()));
 	connect(actionOpenColorScalesManager,		SIGNAL(triggered()),	this,		SLOT(doActionOpenColorScalesManager()));
 	connect(actionAddIdField,					SIGNAL(triggered()),	this,		SLOT(doActionAddIdField()));
@@ -851,6 +854,9 @@ void MainWindow::connectActions()
 	connect(actionMatchBBCenters,				SIGNAL(triggered()),	this,		SLOT(doActionMatchBBCenters()));
 	connect(actionDelete,						SIGNAL(triggered()),	m_ccRoot,	SLOT(deleteSelectedEntities()));
 
+	//"Tools > Clean" menu
+	connect(actionNoiseFilter,					SIGNAL(triggered()),	this,		SLOT(doActionFilterNoise()));
+	
 	//"Tools > Projection" menu
 	connect(actionUnroll,						SIGNAL(triggered()),	this,		SLOT(doActionUnroll()));
 	connect(actionHeightGridGeneration,			SIGNAL(triggered()),	this,		SLOT(doActionHeightGridGeneration()));
@@ -863,7 +869,7 @@ void MainWindow::connectActions()
 	connect(actionCloudMeshDist,				SIGNAL(triggered()),	this,		SLOT(doActionCloudMeshDist()));
 	connect(actionCPS,							SIGNAL(triggered()),	this,		SLOT(doActionComputeCPS()));
 	//"Tools > Statistics" menu
-	connect(actionComputeStatParams,			SIGNAL(triggered()),	this,		SLOT(doActionComputeStatParams()));
+	connect(actionComputeStatParams2,			SIGNAL(triggered()),	this,		SLOT(doActionComputeStatParams())); //duplicated action --> we can't use the same otherwise we get an ugly console warning on Linux :(
 	connect(actionStatisticalTest,				SIGNAL(triggered()),	this,		SLOT(doActionStatisticalTest()));
 	//"Tools > Segmentation" menu
 	connect(actionLabelConnectedComponents,		SIGNAL(triggered()),	this,		SLOT(doActionLabelConnectedComponents()));
@@ -1030,9 +1036,19 @@ void MainWindow::doActionSetColor(bool colorize)
 			else if (cloud->getParent() && cloud->getParent()->isKindOf(CC_TYPES::MESH))
 				cloud->getParent()->showColors(true);
 		}
+		else if (ent->isKindOf(CC_TYPES::PRIMITIVE))
+		{
+			ccGenericPrimitive* prim = ccHObjectCaster::ToPrimitive(ent);
+			colorType col[3] = {static_cast<colorType>(newCol.red()),
+								static_cast<colorType>(newCol.green()),
+								static_cast<colorType>(newCol.blue()) };
+			prim->setColor(col);
+			ent->showColors(true);
+			ent->prepareDisplayForRefresh();
+		}
 		else if (ent->isA(CC_TYPES::POLY_LINE))
 		{
-			ccPolyline * poly = ccHObjectCaster::ToPolyline(ent);
+			ccPolyline* poly = ccHObjectCaster::ToPolyline(ent);
 			colorType col[3] = {static_cast<colorType>(newCol.red()),
 								static_cast<colorType>(newCol.green()),
 								static_cast<colorType>(newCol.blue()) };
@@ -1627,7 +1643,6 @@ void MainWindow::doActionApplyTransformation()
 		return;
 
 	ccGLMatrixd transMat = dlg.getTransformation();
-	CCVector3d T = transMat.getTranslationAsVec3D();
 
 	//if the transformation is partly converted to global shift/scale
 	bool updateGlobalShiftAndScale = false;
@@ -1677,7 +1692,6 @@ void MainWindow::doActionApplyTransformation()
 					//existing shift information
 					CCVector3d globalShift = cloud->getGlobalShift();
 					double globalScale = cloud->getGlobalScale();
-					bool cloudAlreadyShifted = cloud->isShifted();
 			
 					//we compute the transformation matrix in the global coordinate space
 					ccGLMatrixd globalTransMat = transMat;
@@ -3273,6 +3287,90 @@ void MainWindow::doActionFilterByValue()
 	refreshAll();
 }
 
+static int s_randomColorsNumber = 256;
+void MainWindow::doActionSFConvertToRandomRGB()
+{
+	bool ok;
+	s_randomColorsNumber = QInputDialog::getInt(this, "Random colors", "Number of random colors (will be regularly sampled over the SF interval):", s_randomColorsNumber, 2, 2147483647, 16, &ok);
+	if (!ok)
+		return;
+	assert(s_randomColorsNumber > 1);
+
+	ColorsTableType* randomColors = new ColorsTableType;
+	if (!randomColors->reserve(static_cast<unsigned>(s_randomColorsNumber)))
+	{
+		ccConsole::Error("Not enough memory!");
+		return;
+	}
+
+	//generate random colors
+	{
+		for (int i=0; i<s_randomColorsNumber; ++i)
+		{
+			colorType col[3];
+			ccColor::Generator::Random(col);
+			randomColors->addElement(col);
+		}
+	}
+
+	//apply random colors
+	size_t selNum = m_selectedEntities.size();
+	for (size_t i=0; i<selNum; ++i)
+	{
+		ccGenericPointCloud* cloud = 0;
+		ccHObject* ent = m_selectedEntities[i];
+
+		bool lockedVertices;
+		cloud = ccHObjectCaster::ToPointCloud(ent,&lockedVertices);
+		if (lockedVertices)
+		{
+			DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+			continue;
+		}
+		if (cloud) //TODO
+		{
+			ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
+			ccScalarField* sf = pc->getCurrentDisplayedScalarField();
+			//if there is no displayed SF --> nothing to do!
+			if (sf && sf->currentSize() >= pc->size())
+			{
+				if (!pc->resizeTheRGBTable(false))
+				{
+					ccConsole::Error("Not enough memory!");
+					break;
+				}
+				else
+				{
+					ScalarType minSF = sf->getMin();
+					ScalarType maxSF = sf->getMax();
+
+					ScalarType step = (maxSF-minSF)/(s_randomColorsNumber-1);
+					if (step == 0)
+						step = static_cast<ScalarType>(1.0);
+
+					for (unsigned i=0; i<pc->size(); ++i)
+					{
+						ScalarType val = sf->getValue(i);
+						unsigned colIndex = static_cast<unsigned>((val-minSF)/step);
+						if (colIndex == s_randomColorsNumber)
+							--colIndex;
+
+						pc->setPointColor(i,randomColors->getValue(colIndex));
+					}
+
+					pc->showColors(true);
+					pc->showSF(false);
+				}
+			}
+
+			cloud->prepareDisplayForRefresh_recursive();
+		}
+	}
+
+	refreshAll();
+	updateUI();
+}
+
 void MainWindow::doActionSFConvertToRGB()
 {
 	//we first ask the user if the SF colors should be mixed with existing colors
@@ -3280,7 +3378,7 @@ void MainWindow::doActionSFConvertToRGB()
 	{
 		QMessageBox::StandardButton answer = QMessageBox::warning(	this,
 																	"Scalar Field to RGB",
-																	"Mix with existing colors (if relevant)?",
+																	"Mix with existing colors (if any)?",
 																	QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel,
 																	QMessageBox::Yes );
 		if (answer == QMessageBox::Yes)
@@ -3474,25 +3572,33 @@ void MainWindow::doActionAddIdField()
 	updateUI();
 }
 
+PointCoordinateType MainWindow::GetDefaultCloudKernelSize(ccGenericPointCloud* cloud)
+{
+	assert(cloud);
+	if (cloud && cloud->size() > 0)
+	{
+		//we get 1% of the cloud bounding box
+		//and we divide by the number of points / 10e6 (so that the kernel for a 20 M. points cloud is half the one of a 10 M. cloud)
+		return cloud->getBB().getDiagNorm() * static_cast<PointCoordinateType>(0.01/std::max(1.0,1.0e-7*static_cast<double>(cloud->size())));
+	}
+
+	return -PC_ONE;
+}
+
 PointCoordinateType MainWindow::GetDefaultCloudKernelSize(const ccHObject::Container& entities)
 {
-	PointCoordinateType sigma = -1;
+	PointCoordinateType sigma = -PC_ONE;
 
 	size_t selNum = entities.size();
 	//computation of a first sigma guess
 	for (size_t i=0; i<selNum; ++i)
 	{
 		ccPointCloud* pc = ccHObjectCaster::ToPointCloud(entities[i]);
-		if (pc && pc->size()>0)
-		{
-			//we get 1% of the cloud bounding box
-			//and we divide by the number of points / 10e6 (so that the kernel for a 20 M. points cloud is half the one of a 10 M. cloud)
-			PointCoordinateType sigmaCloud = pc->getBB().getDiagNorm() * static_cast<PointCoordinateType>(0.01/std::max(1.0,1.0e-7*static_cast<double>(pc->size())));
+		PointCoordinateType sigmaCloud = GetDefaultCloudKernelSize(pc);
 
-			//we keep the smallest value
-			if (sigma < 0 || sigmaCloud < sigma)
-				sigma = sigmaCloud;
-		}
+		//we keep the smallest value
+		if (sigma < 0 || sigmaCloud < sigma)
+			sigma = sigmaCloud;
 	}
 
 	return sigma;
@@ -4123,7 +4229,7 @@ void MainWindow::doActionRegister()
 				{
 					ccGenericMesh* newMesh = 0;
 					if (mesh->isA(CC_TYPES::MESH))
-						newMesh = static_cast<ccMesh*>(mesh)->clone();
+						newMesh = static_cast<ccMesh*>(mesh)->cloneMesh();
 					else
 					{
 						//FIXME TODO
@@ -5803,6 +5909,125 @@ void MainWindow::doActionMatchBBCenters()
 	updateUI();
 }
 
+static bool s_noiseFilterUseKnn = false;
+static int s_noiseFilterKnn = 6;
+static bool s_noiseFilterUseAbsError = false;
+static double s_noiseFilterAbsError = 1.0;
+static double s_noiseFilterNSigma = 1.0;
+static bool s_noiseFilterRemoveIsolatedPoints = false;
+
+void MainWindow::doActionFilterNoise()
+{
+	PointCoordinateType kernelRadius = GetDefaultCloudKernelSize(m_selectedEntities);
+
+	ccSORFilterDlg sorDlg(this);
+	
+	//set semi-persistent/dynamic parameters
+	sorDlg.radiusDoubleSpinBox->setValue(kernelRadius);
+	sorDlg.knnSpinBox->setValue(s_noiseFilterKnn);
+	sorDlg.nSigmaDoubleSpinBox->setValue(s_noiseFilterNSigma);
+	sorDlg.absErrorDoubleSpinBox->setValue(s_noiseFilterAbsError);
+	sorDlg.removeIsolatedPointsCheckBox->setChecked(s_noiseFilterRemoveIsolatedPoints);
+	if (s_noiseFilterUseAbsError)
+		sorDlg.absErrorRadioButton->setChecked(true);
+	else
+		sorDlg.relativeRadioButton->setChecked(true);
+	if (s_noiseFilterUseKnn)
+		sorDlg.knnRadioButton->setChecked(true);
+	else
+		sorDlg.radiusRadioButton->setChecked(true);
+
+	if (!sorDlg.exec())
+		return;
+
+	//update semi-persistent/dynamic parameters
+	kernelRadius = static_cast<PointCoordinateType>(sorDlg.radiusDoubleSpinBox->value());
+	s_noiseFilterUseKnn = sorDlg.knnRadioButton->isChecked();
+	s_noiseFilterKnn = sorDlg.knnSpinBox->value();
+	s_noiseFilterUseAbsError = sorDlg.absErrorRadioButton->isChecked();
+	s_noiseFilterNSigma = sorDlg.nSigmaDoubleSpinBox->value();
+	s_noiseFilterAbsError = sorDlg.absErrorDoubleSpinBox->value();
+	s_noiseFilterRemoveIsolatedPoints = sorDlg.removeIsolatedPointsCheckBox->isChecked();
+
+	ccProgressDialog pDlg(true,this);
+
+	size_t selNum = m_selectedEntities.size();
+	bool firstCloud = true;
+	
+	for (size_t i=0; i<selNum; ++i)
+	{
+		ccHObject* ent = m_selectedEntities[i];
+
+		//specific test for locked vertices
+		bool lockedVertices;
+		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(ent,&lockedVertices);
+		if (cloud && lockedVertices)
+		{
+			DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+			continue;
+		}
+
+		//parameters
+		PointCoordinateType kernerRadius = GetDefaultCloudKernelSize(cloud);
+		double nSigma = 1.0;
+
+		//computation
+		CCLib::ReferenceCloud* selection = CCLib::CloudSamplingTools::sorFilter(cloud,
+																				kernelRadius,
+																				s_noiseFilterNSigma,
+																				s_noiseFilterRemoveIsolatedPoints,
+																				s_noiseFilterUseKnn,
+																				s_noiseFilterKnn,
+																				s_noiseFilterUseAbsError,
+																				s_noiseFilterAbsError,
+																				0,
+																				&pDlg);
+
+		if (selection)
+		{
+			if (selection->size() == cloud->size())
+			{
+				ccLog::Warning(QString("[doActionFilterNoise] No points were removed from cloud '%1'").arg(cloud->getName()));
+			}
+			else
+			{
+				ccPointCloud* cleanCloud = cloud->partialClone(selection);
+				if (cleanCloud)
+				{
+					cleanCloud->setName(cloud->getName()+QString(".clean"));
+					cleanCloud->setDisplay(cloud->getDisplay());
+					if (cloud->getParent())
+						cloud->getParent()->addChild(cleanCloud);
+					addToDB(cleanCloud);
+
+					cloud->setEnabled(false);
+					if (firstCloud)
+					{
+						ccConsole::Warning("Previously selected entities (sources) have been hidden!");
+						firstCloud = false;
+						m_ccRoot->selectEntity(cleanCloud,true);
+					}
+				}
+				else
+				{
+					ccConsole::Warning(QString("[doActionFilterNoise] Not enough memory to create clean version of cloud '%1'!").arg(cloud->getName()));
+				}
+			}
+			
+			delete selection;
+			selection = 0;
+		}
+		else
+		{
+			//no points fall inside selection!
+			ccConsole::Warning(QString("[doActionFilterNoise] Failed to apply SOR filter to cloud '%1'! (not enough memory?)").arg(cloud->getName()));
+		}
+	}
+
+	refreshAll();
+	updateUI();
+}
+
 void MainWindow::doActionUnroll()
 {
 	//there should be only one point cloud with sensor in current selection!
@@ -5970,7 +6195,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 	//}
 	//else
 	{
-		if (m_ccRoot && m_ccRoot->getRootEntity()->getChildrenNumber() == 0
+		if ((m_ccRoot && m_ccRoot->getRootEntity()->getChildrenNumber() == 0)
 			|| QMessageBox::question(	this,
 										"Quit",
 										"Are you sure you want to quit?",
@@ -6401,7 +6626,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 								ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(segmentationResult);
 
 								int errorCode;
-								CCLib::GenericIndexedCloud* projectedPoints = cloned_sensor->project(cloud,errorCode,true);
+								cloned_sensor->project(cloud,errorCode,true);
 
 								// we need also to do the same for the original cloud
 								sensor->project(ccHObjectCaster::ToGenericPointCloud(entity), errorCode, true);
@@ -7336,7 +7561,7 @@ void MainWindow::doActionClone()
 		}
 		else if (selectedEntities[i]->isA(CC_TYPES::MESH))
 		{
-			clone = ccHObjectCaster::ToMesh(selectedEntities[i])->clone();
+			clone = ccHObjectCaster::ToMesh(selectedEntities[i])->cloneMesh();
 			if (!clone)
 			{
 				ccConsole::Error(QString("An error occurred while cloning mesh %1").arg(selectedEntities[i]->getName()));
@@ -8658,8 +8883,6 @@ void MainWindow::addToDB(const QStringList& filenames, CC_FILE_TYPES fType, ccGL
 
 	//the same for 'addToDB' (if the first one is not supported, or if the scale remains too big)
 	CCVector3d addCoordinatesShift(0,0,0);
-	bool addCoordinatesTransEnabled = false;
-	double addCoordinatesScale = 1.0;
 
 	for (int i=0; i<filenames.size(); ++i)
 	{
@@ -9410,9 +9633,11 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 
 	actionFilterByValue->setEnabled(atLeastOneSF);
 	actionConvertToRGB->setEnabled(atLeastOneSF);
+	actionConvertToRandomRGB->setEnabled(atLeastOneSF);
 	actionRenameSF->setEnabled(atLeastOneSF);
 	actionAddIdField->setEnabled(atLeastOneCloud);
 	actionComputeStatParams->setEnabled(atLeastOneSF);
+	actionComputeStatParams2->setEnabled(atLeastOneSF);
 	actionShowHistogram->setEnabled(atLeastOneSF);
 	actionGaussianFilter->setEnabled(atLeastOneSF);
 	actionBilateralFilter->setEnabled(atLeastOneSF);

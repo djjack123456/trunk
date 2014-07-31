@@ -95,6 +95,12 @@ public:
 	//! Returns last input info (if any)
 	bool getLast(ShiftInfo& info) const;
 
+	//! Returns a given input info
+	bool getInfo(size_t index, ShiftInfo& info) const;
+
+	//! Returns the number of info currently stored
+	size_t infoCount() const { return m_defaultInfos.size(); }
+
 	//! Makes the specified combo-box entry (index) the current one
 	void makeCurrent(int index);
 
@@ -111,6 +117,8 @@ protected slots:
 	void onClick(QAbstractButton* button);
 	//! Updates info on the global and local coordinate systems
 	void updateGlobalAndLocalSystems();
+	//! Displays more info about global shift mechanism
+	void displayMoreInfo();
 
 protected:
 
